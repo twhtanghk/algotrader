@@ -1,0 +1,22 @@
+{
+  "name": "algotrader",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.coffee",
+  "scripts": {
+    "test": "node -r coffeescript/register -r esm test/data.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/twhtanghk/algotrader.git"
+  },
+  "author": "twhtanghk@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/twhtanghk/algotrader/issues"
+  },
+  "homepage": "https://github.com/twhtanghk/algotrader#readme",
+  "dependencies": {
+    "futu": "https://github.com/twhtanghk/futu"
+  }
+}
