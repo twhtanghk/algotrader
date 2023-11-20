@@ -19,25 +19,41 @@ freq = [
 
 class Stream extends Readable
   # codes = {market, code} or [{market, code}, ....]
-  constructor: (exchange, codes, freq='1') ->
+  constructor: (@broker) ->
     super objectMode: true
+    # data: {market, code, timestamp, open, high, low, close, lastClose, volume, turnover} 
+    @broker.on 'candle', (data) =>
+      @resume()
+      @push data
+
+  subscribe: (codes, freq) ->
     if not Array.isArray codes
       codes = [codes]
 
     do =>
+      {marketMap, freqMap} = @broker.constructor
       for {market, code} in codes
-        await exchange.subscribe
-          market: market
+        await @broker.subscribe
+          market: marketMap[market]
           code: code
-          subtype: freq
+          subtype: freqMap[freq]
 
-    # data: {market, code, timestamp, open, high, low, close, lastClose, volume, turnover} 
-    exchange.on 'candle', (data) ->
-      @push data
+  unSubscribe: (codes, freq) ->
+    if not Array.isArray codes
+      codes = [codes]
 
-    @
+    do =>
+      {marketMap, freqMap} = @broker.constructor
+      for {market, code} in codes
+        await @broker.unSubscribe
+          market: marketMap[market]
+          code: code
+          subtype: freqMap[freq]
+
+  _read: ->
+    @pause()
     
-history = (exchange, {market, code, start, end, freq} = {}) ->
+history = (broker, {market, code, start, end, freq} = {}) ->
   market ?= 'hk'
   end ?= moment()
   start ?= moment end
@@ -45,12 +61,12 @@ history = (exchange, {market, code, start, end, freq} = {}) ->
   freq ?= '1d'
   switch market
     when 'hk'
-      {klList} = await exchange
+      {klList} = await broker
         .historyKL
           security:
-            market: exchange.constructor.marketMap[market]
+            market: broker.constructor.marketMap[market]
             code: code
-          klType: exchange.constructor.freqMap[freq]
+          klType: broker.constructor.freqMap[freq]
           beginTime: start.format 'YYYY-MM-DD'
           endTime: end.format 'YYYY-MM-DD'
       klList
