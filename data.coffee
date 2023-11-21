@@ -1,5 +1,7 @@
 {Readable} = require 'stream'
 import moment from 'moment'
+{ohlc} = require './analysis'
+stats = require 'stats-lite'
 
 market = [
   'hk'
@@ -71,8 +73,31 @@ history = (broker, {market, code, start, end, freq} = {}) ->
           endTime: end.format 'YYYY-MM-DD'
       klList
 
-module.exports =
-  market: market
-  freq: freq
-  Stream: Stream
-  history: history
+# get constituents stock of specified index
+constituent = (broker, idx='HSI Constituent') ->
+  await broker.plateSecurity code: idx
+
+# get last.close, stdev, support and resistance levels of specified stock
+indicator = (broker, code) ->
+  df = await history broker,
+    market: 'hk'
+    code: code
+  [..., last] = df
+  close = last.close
+  levels = ohlc
+    .levels df
+    .sort ([closeA, idxA], [closeB, idxB]) ->
+      closeA - closeB
+  mean = stats.mean levels.map ([close, idx]) ->
+    close
+  stdev = stats.stdev levels.map ([close]) -> close
+  { code, close, mean, stdev, levels }
+
+module.exports = {
+  market
+  freq
+  Stream
+  history
+  constituent
+  indicator
+}

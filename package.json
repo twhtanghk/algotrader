@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.coffee",
   "scripts": {
-    "test": "node -r coffeescript/register -r esm test/data.coffee"
+    "test": "node -r coffeescript/register -r esm  test/data.coffee"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/twhtanghk/algotrader#readme",
   "dependencies": {
-    "futu": "https://github.com/twhtanghk/futu"
+    "futu": "https://github.com/twhtanghk/futu",
+    "stats-lite": "^2.2.0"
   }
 }

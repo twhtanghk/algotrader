@@ -39,5 +39,9 @@ do ->
     # get broker past filled orders
     for await i from broker.historyDeal()
       console.log i
+
+    # get hsi constituents stock
+    for i from await broker.plateSecurity()
+      console.log i
   catch err
     console.error err
