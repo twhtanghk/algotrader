@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>strategy.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>strategy.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-1">&#x00a7;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-built_in">Promise</span> = <span class="hljs-built_in">require</span> <span class="hljs-string">&#x27;bluebird&#x27;</span>
+{constituent, indicator} = <span class="hljs-built_in">require</span> <span class="hljs-string">&#x27;./data&#x27;</span>
+stats = <span class="hljs-built_in">require</span> <span class="hljs-string">&#x27;stats-lite&#x27;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-2">&#x00a7;</a>
+              </div>
+              <p>get constituent stocks of input index and sort by risk (stdev)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">orderByRisk</span> = <span class="hljs-params">(broker, idx=<span class="hljs-string">&#x27;HSI Constituent&#x27;</span>)</span> -&gt;</span>
+  list = <span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>
+    .mapSeries (<span class="hljs-keyword">await</span> constituent broker, idx), <span class="hljs-function"><span class="hljs-params">(code)</span> -&gt;</span>
+      <span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>.delay <span class="hljs-number">1000</span>
+      indicator broker, code
+  list
+    .sort (stockA, stockB) -&gt;
+      stockA.stdev - stockB.stdev</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-3">&#x00a7;</a>
+              </div>
+              <p>get constituent stock of input index and sortlisted those stocks
+not falling within the range [mean - n * stdev, mean + n * stdev]</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">filterByStdev</span> = <span class="hljs-params">(broker, idx=<span class="hljs-string">&#x27;HSI Constituent&#x27;</span>, n=<span class="hljs-number">2</span>)</span> -&gt;</span>
+  list = <span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>
+    .mapSeries (<span class="hljs-keyword">await</span> constituent broker, idx), <span class="hljs-function"><span class="hljs-params">(code)</span> -&gt;</span>
+      <span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>.delay <span class="hljs-number">1000</span>
+      indicator broker, code
+  list
+    .filter (stock) -&gt;
+      stock.close &lt;= stock.mean - n * stock.stdev <span class="hljs-keyword">or</span>
+      stock.close &gt;= stock.mean + n * stock.stdev
+    .sort (stockA, stockB) -&gt;
+      stockA.stdev - stockB.stdev
+
+breakout =</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-4">&#x00a7;</a>
+              </div>
+              <p>compare last volume and mean(previous length-1) +- n * stdev
+return 1: volume up, 0: none, -1: volume down</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  volume: <span class="hljs-function"><span class="hljs-params">(df, n=<span class="hljs-number">2</span>)</span> -&gt;</span>
+    [curr..., last] = df
+    mean = stats.mean curr.map ({volume}) -&gt; volume
+    stdev = stats.stdev curr.map ({volume}) -&gt; volume
+    <span class="hljs-keyword">if</span> last.volume &gt; mean + n * stdev
+      <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> last.volume &lt; mean - n * stdev
+      <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+    <span class="hljs-keyword">else</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-5">&#x00a7;</a>
+              </div>
+              <p>compare last close price and mean(previous length-1) +- n * stdev
+return 1: price up, 0: none, -1: price down</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  price: <span class="hljs-function"><span class="hljs-params">(df, n=<span class="hljs-number">2</span>)</span> -&gt;</span>
+    [curr..., last] = df
+    mean = stats.mean curr.map ({close}) -&gt; close
+    stdev = stats.stdev curr.map ({close}) -&gt; close
+    <span class="hljs-keyword">if</span> last.close &gt; mean + n * stdev
+      <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> last.close &lt; mean - n * stdev
+      <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+    <span class="hljs-keyword">else</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+  
+  level: <span class="hljs-function"><span class="hljs-params">(stream, levels)</span> -&gt;</span>
+    ret = <span class="hljs-keyword">new</span> EventEmitter()
+    levels = levels.sort ([priceA, idxA], [priceB, idxB]) -&gt;
+      priceA - priceB
+    [min, ..., max] = levels
+    console.log <span class="hljs-string">&quot;<span class="hljs-subst">#{min}</span> <span class="hljs-subst">#{max}</span> <span class="hljs-subst">#{levels}</span>&quot;</span>
+    stream.<span class="hljs-literal">on</span> <span class="hljs-string">&#x27;data&#x27;</span>, <span class="hljs-function"><span class="hljs-params">({close, lastClose})</span> -&gt;</span>
+      <span class="hljs-keyword">if</span> close &gt; lastClose <span class="hljs-keyword">and</span> close &gt; max[<span class="hljs-number">0</span>]
+        ret.emit <span class="hljs-number">1</span>
+      <span class="hljs-keyword">if</span> close &lt; lastClose <span class="hljs-keyword">and</span> close &lt; min[<span class="hljs-number">0</span>]
+        ret.emit <span class="hljs-number">-1</span>
+    ret
+
+module.<span class="hljs-built_in">exports</span> = {
+  orderByRisk
+  filterBy95
+  breakout
+}</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

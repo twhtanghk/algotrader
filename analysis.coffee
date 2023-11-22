@@ -34,7 +34,7 @@ meanDiff = (mean, price, levels) ->
       return false
   return true
 
-# https://colab.research.google.com/drive/16yWD7FJ-moOc9jjymDgQjLXvW-yPKSf3?usp=sharing#scrollTo=kbcJ8L5nN1B-
+# > See [details](https://colab.research.google.com/drive/16yWD7FJ-moOc9jjymDgQjLXvW-yPKSf3?usp=sharing#scrollTo=kbcJ8L5nN1B-)
 # get list of support and resistance price levels
 levels = (df) ->
   ret = []

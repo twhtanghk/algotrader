@@ -1,6 +1,8 @@
 Promise = require 'bluebird'
-{constituent, indicator} = require './data'
 stats = require 'stats-lite'
+EventEmitter = require 'events'
+{constituent, indicator} = require './data'
+{ohlc} = require './analysis'
 
 # get constituent stocks of input index and sort by risk (stdev)
 orderByRisk = (broker, idx='HSI Constituent') ->
@@ -13,16 +15,16 @@ orderByRisk = (broker, idx='HSI Constituent') ->
       stockA.stdev - stockB.stdev
 
 # get constituent stock of input index and sortlisted those stocks
-# not falling within the range [mean - 2 * stdev, mean + 2 * stdev]
-filterBy95 = (broker, idx='HSI Constituent') ->
+# not falling within the range [mean - n * stdev, mean + n * stdev]
+filterByStdev = (broker, idx='HSI Constituent', n=2) ->
   list = await Promise
     .mapSeries (await constituent broker, idx), (code) ->
       await Promise.delay 1000
       indicator broker, code
   list
     .filter (stock) ->
-      stock.close <= stock.mean - 2 * stock.stdev or
-      stock.close >= stock.mean + 2 * stock.stdev
+      stock.close <= stock.mean - n * stock.stdev or
+      stock.close >= stock.mean + n * stock.stdev
     .sort (stockA, stockB) ->
       stockA.stdev - stockB.stdev
 
@@ -53,8 +55,29 @@ breakout =
     else
       return 0
   
+  # compute support or resistance levels of df
+  # subscribe code for stream ohlc data update
+  # return eventEmitter to emit
+  #   1: if ohlc data breakout for resistance level and higher than last close
+  #   -1: if ohlc data breakout for support level and lower than last close
+  level: ({market, code}, df, stream) ->
+    ret = new EventEmitter()
+    levels = ohlc 
+      .levels df
+      .sort ([priceA, idxA], [priceB, idxB]) ->
+        priceA - priceB
+    [min, ..., max] = levels
+    stream
+      .subscribe {market, code}
+      .on 'data', ({close, lastClose}) ->
+        if close > lastClose and close > max[0]
+          ret.emit 1
+        if close < lastClose and close < min[0]
+          ret.emit -1
+    ret
+
 module.exports = {
   orderByRisk
-  filterBy95
+  filterByStdev
   breakout
 }
