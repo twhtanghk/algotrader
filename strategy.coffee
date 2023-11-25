@@ -76,8 +76,35 @@ breakout =
           ret.emit -1
     ret
 
+# return generator of elements with mean, stdev for last chunkSize of elements
+# element.trend = 1 up trend if close < mean - n * stdev
+# element.trend = -1 down trend if close > mean + n * stdev
+# otherwise element.trend = 0
+meanReversion = (df, chunkSize=60, n=2) ->
+  chunk = []
+  for await i from df()
+    chunk.push i
+    if chunk.length < chunkSize
+      yield i
+    else if chunk.length == chunkSize
+      [..., last] = chunk
+      close = chunk.map ({close}) ->
+        close
+      last.stdev = stats.stdev close
+      last.mean = stats.mean close
+      
+      if last.close < last.mean - n * last.stdev
+        last.trend = 1
+      else if last.close > last.mean + n * last.stdev
+        last.trend = -1
+      else
+        last.trend = 0
+      yield last
+      chunk.shift()
+
 module.exports = {
   orderByRisk
   filterByStdev
   breakout
+  meanReversion
 }
