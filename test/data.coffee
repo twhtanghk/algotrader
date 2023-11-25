@@ -46,7 +46,7 @@ do ->
       console.log i
 
     # get ohlc data from async generator
-    for await i from data {broker: broker, code: '00700', beginTime: moment '2023-11-19'}
+    for await i from data {broker: broker, code: '00700', beginTime: moment '2022-10-01'}
       i.time = new Date i.time * 1000
       console.log i
   catch err

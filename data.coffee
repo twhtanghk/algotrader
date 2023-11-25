@@ -87,11 +87,21 @@ data = ({broker, market, code, beginTime, freq}) ->
   market ?= 'hk'
   freq ?= '1'
   if beginTime?
-    yield from await history broker,
-      market: market
-      code: code
-      start: beginTime
-      freq: freq
+    now = moment()
+    endTime = moment beginTime
+      .endOf 'month'
+    while beginTime.isBefore now
+      yield from await history broker,
+        market: market
+        code: code
+        start: beginTime
+        end: endTime
+        freq: freq
+      beginTime = beginTime
+        .add 1, 'month'
+        .startOf 'month'
+      endTime = moment beginTime
+        .endOf 'month'
   stream = new Promise (resolve, reject) ->
     (await new Stream broker)
       .subscribe {market, code}, freq
