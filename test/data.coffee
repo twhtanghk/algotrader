@@ -1,4 +1,5 @@
-{history, Stream} = require '../data'
+moment = require 'moment'
+{history, Stream, data} = require '../data'
 {Futu} = require 'futu'
 
 debug = (obj) ->
@@ -42,6 +43,11 @@ do ->
 
     # get hsi constituents stock
     for i from await broker.plateSecurity()
+      console.log i
+
+    # get ohlc data from async generator
+    for await i from data {broker: broker, code: '00700', beginTime: moment '2023-11-19'}
+      i.time = new Date i.time * 1000
       console.log i
   catch err
     console.error err

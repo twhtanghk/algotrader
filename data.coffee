@@ -81,6 +81,25 @@ history = (broker, {market, code, start, end, freq} = {}) ->
           endTime: end.format 'YYYY-MM-DD'
       klList
 
+# async generator to get ohlc data for specified broker, stock market and code,
+# beginTime, and freq
+data = ({broker, market, code, beginTime, freq}) ->
+  market ?= 'hk'
+  freq ?= '1'
+  if beginTime?
+    yield from await history broker,
+      market: market
+      code: code
+      start: beginTime
+      freq: freq
+  stream = new Promise (resolve, reject) ->
+    (await new Stream broker)
+      .subscribe {market, code}, freq
+      .on 'data', resolve
+      .on 'error', reject
+  while true
+    yield await stream
+
 ###
 # get constituents stock of specified index
 # > index:
@@ -131,6 +150,7 @@ module.exports = {
   freq
   Stream
   history
+  data
   constituent
   indicator
 }

@@ -1,9 +1,9 @@
 {Futu} = require 'futu'
-{filterBy95} = require '../strategy'
+{filterByStdev} = require '../strategy'
 
 try
   broker = await new Futu host: 'localhost', port: 33333
-  ret = (await filterBy95 broker)
+  ret = (await filterByStdev broker)
     .map (stock) ->
       stock.min = stock.mean - 2 * stock.stdev
       stock.max = stock.mean + 2 * stock.stdev
