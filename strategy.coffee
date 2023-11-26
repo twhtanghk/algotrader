@@ -28,59 +28,14 @@ filterByStdev = (broker, idx='HSI Constituent', n=2) ->
     .sort (stockA, stockB) ->
       stockA.stdev - stockB.stdev
 
-breakout =
-  # compare last volume and mean(previous length-1) +- n * stdev
-  # return 1: volume up, 0: none, -1: volume down
-  volume: (df, n=2) ->
-    [curr..., last] = df
-    mean = stats.mean curr.map ({volume}) -> volume
-    stdev = stats.stdev curr.map ({volume}) -> volume
-    if last.volume > mean + n * stdev
-      return 1
-    else if last.volume < mean - n * stdev
-      return -1
-    else
-      return 0
-
-  # compare last close price and mean(previous length-1) +- n * stdev
-  # return 1: price up, 0: none, -1: price down
-  price: (df, n=2) ->
-    [curr..., last] = df
-    mean = stats.mean curr.map ({close}) -> close
-    stdev = stats.stdev curr.map ({close}) -> close
-    if last.close > mean + n * stdev
-      return 1
-    else if last.close < mean - n * stdev
-      return -1
-    else
-      return 0
-  
-  # compute support or resistance levels of df
-  # subscribe code for stream ohlc data update
-  # return eventEmitter to emit
-  #   1: if ohlc data breakout for resistance level and higher than last close
-  #   -1: if ohlc data breakout for support level and lower than last close
-  level: ({market, code}, df, stream) ->
-    ret = new EventEmitter()
-    levels = ohlc 
-      .levels df
-      .sort ([priceA, idxA], [priceB, idxB]) ->
-        priceA - priceB
-    [min, ..., max] = levels
-    stream
-      .subscribe {market, code}
-      .on 'data', ({close, lastClose}) ->
-        if close > lastClose and close > max[0]
-          ret.emit 1
-        if close < lastClose and close < min[0]
-          ret.emit -1
-    ret
-
-# return generator of elements with mean, stdev for last chunkSize of elements
-# element.trend = 1 up trend if close < mean - n * stdev
-# element.trend = -1 down trend if close > mean + n * stdev
-# otherwise element.trend = 0
-meanReversion = (df, chunkSize=60, n=2) ->
+# compute support or resistance levels of df for specified chunkSize
+# return generator of elements with levels and breakout value
+# 1 : if ohlc data breakout for resistance level and 
+#     higher than last close
+# -1: if ohlc data breakout for support level and 
+#     lower than last close
+# 0 : no breakout
+levels = (df, chunkSize=20) ->
   chunk = []
   for await i from df()
     chunk.push i
@@ -88,23 +43,54 @@ meanReversion = (df, chunkSize=60, n=2) ->
       yield i
     else if chunk.length == chunkSize
       [..., last] = chunk
-      close = chunk.map ({close}) ->
-        close
-      last.stdev = stats.stdev close
-      last.mean = stats.mean close
+      last.levels = ohlc 
+        .levels chunk
+        .map ([price, idx]) ->
+          price
+        .sort (a, b) ->
+          a - b
+      last.breakout = 0
+      for l in last.levels
+        sign = Math.sign(last.close - last.lastClose)
+        if sign == 1 and last.lastClose < l and l < last.close
+          last.breakout = 1
+        else if sign == -1 and last.lastClose > l and l > last.close
+          last.breakout = -1
+      yield last
+      chunk.shift()
+
+# return generator of elements with mean, stdev of specified field
+# for last chunkSize of elements
+# element[#{field}.trend] = -1 down trend if element[field] < mean - n * stdev
+# element[#{field}.trend] = 1 up trend if element[field] > mean + n * stdev
+# otherwise element[#{field}.trend] = 0
+meanReversion = (df, {field, chunkSize, n}) ->
+  chunkSize ?= 60
+  n ?= 2
+  chunk = []
+  for await i from df()
+    chunk.push i
+    if chunk.length < chunkSize
+      yield i
+    else if chunk.length == chunkSize
+      [..., last] = chunk
+      series = chunk.map (data) ->
+        data[field]
+      last["#{field}.stdev"] = stats.stdev series
+      last["#{field}.mean"] = stats.mean series
       
-      if last.close < last.mean - n * last.stdev
-        last.trend = 1
-      else if last.close > last.mean + n * last.stdev
-        last.trend = -1
+      if last[field] < last["#{field}.mean"] - n * last["#{field}.stdev"]
+        last["#{field}.trend"] = -1
+      else if last[field] > last["#{field}.mean"] + n * last["#{field}.stdev"]
+        last["#{field}.trend"] = 1
       else
-        last.trend = 0
+        last[field + '.trend'] = 0
       yield last
       chunk.shift()
 
 module.exports = {
   orderByRisk
   filterByStdev
-  breakout
+  levels
   meanReversion
 }
