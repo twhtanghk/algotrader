@@ -1,4 +1,5 @@
 {Readable} = require 'stream'
+import fromEmitter from '@async-generators/from-emitter'
 import moment from 'moment'
 {ohlc} = require './analysis'
 stats = require 'stats-lite'
@@ -102,13 +103,9 @@ data = ({broker, market, code, beginTime, freq}) ->
         .startOf 'month'
       endTime = moment beginTime
         .endOf 'month'
-  stream = new Promise (resolve, reject) ->
-    (await new Stream broker)
-      .subscribe {market, code}, freq
-      .on 'data', resolve
-      .on 'error', reject
-  while true
-    yield await stream
+  stream = (new Stream broker)
+    .subscribe {market, code}, freq
+  yield from await fromEmitter stream, onNext: 'data'
 
 ###
 # get constituents stock of specified index

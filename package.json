@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/twhtanghk/algotrader#readme",
   "dependencies": {
+    "@async-generators/from-emitter": "^0.3.0",
     "futu": "https://github.com/twhtanghk/futu",
     "stats-lite": "^2.2.0"
   }
