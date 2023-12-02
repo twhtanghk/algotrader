@@ -1,7 +1,7 @@
 moment = require 'moment'
 {Futu} = require 'futu'
 {data} = require '../data'
-{levels, meanReversion} = require '../strategy'
+{indicator} = require '../strategy'
 
 do ->
   try
@@ -9,13 +9,9 @@ do ->
 
     df = ->
       yield from await data {broker: broker, code: process.argv[2], beginTime: moment('2022-01-01'), freq: '1d'}
-    mean = -> 
-      yield from await meanReversion df, {field: 'volume', chunkSize: 20, n: 0}
-    vol = ->
-      yield from await levels mean, 180
-    for await i from vol()
-      i.time = new Date i.time * 1000
-      if i['volume.trend'] == 1 and i.breakout in [1, -1]
+    for await i from indicator df, 180
+      if i.breakout in [1, -1]
+        i.timestamp = new Date i.timestamp * 1000
         console.log i
   catch err
     console.error err

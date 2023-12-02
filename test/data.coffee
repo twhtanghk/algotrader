@@ -10,7 +10,8 @@ do ->
     broker = await new Futu host: 'localhost', port: 33333
 
     # get history data
-    debug await history broker,
+    debug await history 
+      broker: broker
       market: 'hk'
       code: '00700'
 

@@ -4,24 +4,6 @@ import moment from 'moment'
 {ohlc} = require './analysis'
 stats = require 'stats-lite'
 
-# supported market
-market = [
-  'hk'
-  'us'
-]
-
-# frequency to provide update of ohlc data
-freq = [
-  '1'
-  '5'
-  '15'
-  '1h'
-  '1d'
-  '1w'
-  '1m'
-  '1y'
-]
-
 # stream to provide update of ohlc data for subscribed stocks
 class Stream extends Readable
   # codes = {market, code} or [{market, code}, ....]
@@ -64,7 +46,7 @@ class Stream extends Readable
     @pause()
     
 # get history ohlc data for specified start/end time and update frequency
-history = (broker, {market, code, start, end, freq} = {}) ->
+history = ({broker, market, code, start, end, freq} = {}) ->
   market ?= 'hk'
   end ?= moment()
   start ?= moment end
@@ -92,7 +74,8 @@ data = ({broker, market, code, beginTime, freq}) ->
     endTime = moment beginTime
       .endOf 'month'
     while beginTime.isBefore now
-      yield from await history broker,
+      yield from await history 
+        broker: broker
         market: market
         code: code
         start: beginTime
@@ -136,28 +119,9 @@ data = ({broker, market, code, beginTime, freq}) ->
 constituent = (broker, idx='HSI Constituent') ->
   await broker.plateSecurity code: idx
 
-# get last.close, mean, stdev, support and resistance levels of specified stock
-indicator = (broker, code) ->
-  df = await history broker,
-    market: 'hk'
-    code: code
-  [..., last] = df
-  close = last.close
-  levels = ohlc
-    .levels df
-    .sort ([closeA, idxA], [closeB, idxB]) ->
-      closeA - closeB
-  mean = stats.mean levels.map ([close, idx]) ->
-    close
-  stdev = stats.stdev levels.map ([close]) -> close
-  { code, close, mean, stdev, levels }
-
 module.exports = {
-  market
-  freq
   Stream
   history
   data
   constituent
-  indicator
 }

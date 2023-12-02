@@ -1,32 +1,9 @@
 Promise = require 'bluebird'
+moment = require 'moment'
 stats = require 'stats-lite'
 EventEmitter = require 'events'
-{constituent, indicator} = require './data'
+{constituent, history, data} = require './data'
 {ohlc} = require './analysis'
-
-# get constituent stocks of input index and sort by risk (stdev)
-orderByRisk = (broker, idx='HSI Constituent') ->
-  list = await Promise
-    .mapSeries (await constituent broker, idx), (code) ->
-      await Promise.delay 1000
-      indicator broker, code
-  list
-    .sort (stockA, stockB) ->
-      stockA.stdev - stockB.stdev
-
-# get constituent stock of input index and sortlisted those stocks
-# not falling within the range [mean - n * stdev, mean + n * stdev]
-filterByStdev = (broker, idx='HSI Constituent', n=2) ->
-  list = await Promise
-    .mapSeries (await constituent broker, idx), (code) ->
-      await Promise.delay 1000
-      indicator broker, code
-  list
-    .filter (stock) ->
-      stock.close <= stock.mean - n * stock.stdev or
-      stock.close >= stock.mean + n * stock.stdev
-    .sort (stockA, stockB) ->
-      stockA.stdev - stockB.stdev
 
 # compute support or resistance levels of df for specified chunkSize
 # return generator of elements with levels and breakout value
@@ -52,8 +29,10 @@ levels = (df, chunkSize=20) ->
       last.breakout = 0
       for l in last.levels
         sign = Math.sign(last.close - last.lastClose)
+        # upward breakout for one of existing levels
         if sign == 1 and last.lastClose < l and l < last.close
           last.breakout = 1
+        # downward breakout for one of existing levels
         else if sign == -1 and last.lastClose > l and l > last.close
           last.breakout = -1
       yield last
@@ -88,9 +67,79 @@ meanReversion = (df, {field, chunkSize, n}) ->
       yield last
       chunk.shift()
 
+# supplement mean of close value
+meanClose = (df, chunkSize=20) ->
+  yield from await meanReversion df, {field: 'close', chunkSize: chunkSize, n: 0}
+
+# supplement mean of volume value
+meanVol = (df, chunkSize=20) ->
+  yield from await meanReversion df, {field: 'volume', chunkSize: chunkSize, n: 0}
+
+# supplement mean of close and vol, support and resistance levels
+# of last chunkSize elements for input generator of ohlc series  
+indicator = (df, chunkSize=20) ->
+  close = ->
+    yield from await meanClose df, chunkSize
+  vol = ->
+    yield from await meanVol close, chunkSize
+  yield from await levels vol, chunkSize
+
+# get constituent stocks of input index and sort by risk (stdev)
+orderByRisk = (broker, idx='HSI Constituent', chunkSize=60) ->
+  list = await Promise
+    .mapSeries (await constituent broker, idx), (code) ->
+      await Promise.delay 1000
+      beginTime = moment()
+        .subtract 6, 'month'
+      df = ->
+        opts =
+          broker: broker
+          code: code
+          beginTime: beginTime
+          freq: '1d'
+        for i in await history opts
+          yield i
+      last = null
+      for await i from indicator df, chunkSize
+        last = i
+      {code, last}
+  list
+    .sort (stockA, stockB) ->
+      stockA.last['close.stdev'] - stockB.last['close.stdev']
+        
+# get constituent stock of input index and sortlisted those stocks
+# not falling within the range [mean - n * stdev, mean + n * stdev]
+filterByStdev = (broker, idx='HSI Constituent', chunkSize=60, n=2) ->
+  list = await Promise
+    .mapSeries (await constituent broker, idx), (code) ->
+      await Promise.delay 1000
+      beginTime = moment()
+        .subtract 6, 'month'
+      df = ->
+        opts =
+          broker: broker
+          code: code
+          beginTime: beginTime
+          freq: '1d'
+        for i in await history opts
+          yield i
+      ind = -> 
+        yield from await indicator df, chunkSize
+      last = null
+      for await i from ind() 
+        last = i
+      {code, last}
+  list
+    .filter ({last}) ->
+      last['close'] <= last['close.mean'] - n * last['close.stdev'] or
+      last['close'] >= last['close.mean'] + n * last['close.stdev']
+    .sort (stockA, stockB) ->
+      stockA.last['close.stdev'] - stockB.last['close.stdev']
+
 module.exports = {
-  orderByRisk
-  filterByStdev
   levels
   meanReversion
+  indicator
+  orderByRisk
+  filterByStdev
 }
