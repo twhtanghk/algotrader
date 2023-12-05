@@ -20,12 +20,12 @@ class Stream extends Readable
       codes = [codes]
 
     do =>
-      {marketMap, freqMap} = @broker.constructor
+      {marketMap, subTypeMap} = @broker.constructor
       for {market, code} in codes
         await @broker.subscribe
           market: marketMap[market]
           code: code
-          subtype: freqMap[freq]
+          subtype: subTypeMap[freq]
     @
 
   # unsubscribe stocks for ohlc data update and frequency for the update
@@ -34,12 +34,12 @@ class Stream extends Readable
       codes = [codes]
 
     do =>
-      {marketMap, freqMap} = @broker.constructor
+      {marketMap, subTypeMap} = @broker.constructor
       for {market, code} in codes
         await @broker.unSubscribe
           market: marketMap[market]
           code: code
-          subtype: freqMap[freq]
+          subtype: subTypeMap[freq]
     @
 
   _read: ->
@@ -59,7 +59,7 @@ history = ({broker, market, code, start, end, freq} = {}) ->
           security:
             market: broker.constructor.marketMap[market]
             code: code
-          klType: broker.constructor.freqMap[freq]
+          klType: broker.constructor.klTypeMap[freq]
           beginTime: start.format 'YYYY-MM-DD'
           endTime: end.format 'YYYY-MM-DD'
       klList
