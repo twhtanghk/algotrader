@@ -60,7 +60,7 @@ meanReversion = (df, {field, chunkSize, n}) ->
       else if i[field] > i["#{field}.mean"] + n * i["#{field}.stdev"]
         i["#{field}.trend"] = 1
       else
-        i[field + '.trend'] = 0
+        i["#{field}.trend"] = 0
       chunk.shift()
     yield i
 

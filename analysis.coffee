@@ -3,22 +3,22 @@
 #   {date, open, high, low, close}
 #   ...
 # ]
-isSupport = (df, i) ->
-  df[i].low < df[i - 1].low and 
-  df[i].low < df[i + 1].low and
-  df[i + 1].low < df[i + 2].low and
-  df[i - 1].low < df[i - 2].low
+isSupport = (df, i, field='low') ->
+  df[i][field] < df[i - 1][field] and 
+  df[i][field] < df[i + 1][field] and
+  df[i + 1][field] < df[i + 2][field] and
+  df[i - 1][field] < df[i - 2][field]
 
 # input time ascending order of ohlc data
 # i.e. [
 #   {date, open, high, low, close}
 #   ...
 # ]
-isResistance = (df, i) ->
-  df[i].high > df[i - 1].high and 
-  df[i].high > df[i + 1].high and
-  df[i + 1].high > df[i + 2].high and
-  df[i - 1].high > df[i - 2].high
+isResistance = (df, i, field='high') ->
+  df[i][field] > df[i - 1][field] and 
+  df[i][field] > df[i + 1][field] and
+  df[i + 1][field] > df[i + 2][field] and
+  df[i - 1][field] > df[i - 2][field]
 
 # mean of price range i.e. high - low
 mean = (df) ->

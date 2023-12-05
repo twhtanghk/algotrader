@@ -18,7 +18,7 @@ try
   action = ->
     yield from await strategy[method] ind
   for await i from action()
-    if 'entryExit' of i
+    if process.env.DEBUG or 'entryExit' of i
       i.timestamp = new Date i.timestamp * 1000
       console.log JSON.stringify i, null, 2
 catch err
