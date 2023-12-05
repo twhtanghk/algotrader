@@ -12,7 +12,7 @@ EventEmitter = require 'events'
 # -1: if ohlc data breakout for support level and 
 #     lower than last close
 # 0 : no breakout
-levels = (df, chunkSize=20) ->
+levels = (df, chunkSize=180) ->
   chunk = []
   for await i from df()
     chunk.push i
@@ -49,23 +49,20 @@ meanReversion = (df, {field, chunkSize, n}) ->
   chunk = []
   for await i from df()
     chunk.push i
-    if chunk.length < chunkSize
-      yield i
-    else if chunk.length == chunkSize
-      [..., last] = chunk
+    if chunk.length == chunkSize
       series = chunk.map (data) ->
         data[field]
-      last["#{field}.stdev"] = stats.stdev series
-      last["#{field}.mean"] = stats.mean series
+      i["#{field}.stdev"] = stats.stdev series
+      i["#{field}.mean"] = stats.mean series
       
-      if last[field] < last["#{field}.mean"] - n * last["#{field}.stdev"]
-        last["#{field}.trend"] = -1
-      else if last[field] > last["#{field}.mean"] + n * last["#{field}.stdev"]
-        last["#{field}.trend"] = 1
+      if i[field] < i["#{field}.mean"] - n * i["#{field}.stdev"]
+        i["#{field}.trend"] = -1
+      else if i[field] > i["#{field}.mean"] + n * i["#{field}.stdev"]
+        i["#{field}.trend"] = 1
       else
-        last[field + '.trend'] = 0
-      yield last
+        i[field + '.trend'] = 0
       chunk.shift()
+    yield i
 
 # supplement mean of close value
 meanClose = (df, chunkSize=20) ->
@@ -76,16 +73,16 @@ meanVol = (df, chunkSize=20) ->
   yield from await meanReversion df, {field: 'volume', chunkSize: chunkSize, n: 0}
 
 # supplement mean of close and vol, support and resistance levels
-# of last chunkSize elements for input generator of ohlc series  
-indicator = (df, chunkSize=20) ->
+# of last specified chunkSize elements for input generator of ohlc series  
+indicator = (df, [closeSize, volSize, levelSize]=[20, 20, 180]) ->
   close = ->
-    yield from await meanClose df, chunkSize
+    yield from await meanClose df, closeSize
   vol = ->
-    yield from await meanVol close, chunkSize
-  yield from await levels vol, chunkSize
+    yield from await meanVol close, volSize
+  yield from await levels vol, levelSize
 
 # get constituent stocks of input index and sort by risk (stdev)
-orderByRisk = (broker, idx='HSI Constituent', chunkSize=60) ->
+orderByRisk = (broker, idx='HSI Constituent', chunkSize=180) ->
   list = await Promise
     .mapSeries (await constituent broker, idx), (code) ->
       await Promise.delay 1000
@@ -100,7 +97,7 @@ orderByRisk = (broker, idx='HSI Constituent', chunkSize=60) ->
         for i in await history opts
           yield i
       last = null
-      for await i from indicator df, chunkSize
+      for await i from indicator df
         last = i
       {code, last}
   list
@@ -124,7 +121,7 @@ filterByStdev = (broker, idx='HSI Constituent', chunkSize=60, n=2) ->
         for i in await history opts
           yield i
       ind = -> 
-        yield from await indicator df, chunkSize
+        yield from await indicator df
       last = null
       for await i from ind() 
         last = i
@@ -136,10 +133,61 @@ filterByStdev = (broker, idx='HSI Constituent', chunkSize=60, n=2) ->
     .sort (stockA, stockB) ->
       stockA.last['close.stdev'] - stockB.last['close.stdev']
 
+# input generator of data series with indicators (levels, meanClose, meanVol)
+# if vol > vol['mean'] * (1 + volRatio)
+#   if df[2] is resistance level
+#     buy at close price
+#   if df[2] is support level
+#     sell at close price
+levelVol = (df, volRatio=0.2) ->
+  chunk = []
+  for await i from df()
+    chunk.push i
+    if chunk.length == 5
+      if 'volume.mean' of i and i['volume'] > i['volume.mean'] * (1 + volRatio)
+        if ohlc.isSupport chunk, 2
+          i.entryExit =
+            side: 'buy'
+            price: i.close
+        if ohlc.isResistance chunk, 2
+          i.entryExit =
+            side: 'sell'
+            price: i.close
+      chunk.shift() 
+    yield i
+      
+# input generator of data series with indicators (levels, meanClose, meanVol)
+# if vol > vol['mean'] * (1 + volRatio) and volume down trend
+#   if price up
+#     sell at close
+#   if price down
+#     buy at close
+priceVol = (df, volRatio=0.2) ->
+  chunk = []
+  for await i from df()
+    chunk.push i
+    if chunk.length == 3 
+      [a, b, c] = chunk
+      if 'volume.mean' of c and c['volume'] > c['volume.mean'] * (1 + volRatio) and a.volume > b.volume and b.volume > c.volume
+        if a.close > b.close and b.close > c.close
+          i.entryExit =
+            side: 'buy'
+            price: i.close
+        if a.close < b.close and b.close < c.close
+          i.entryExit =
+            side: 'sell'
+            price: i.close
+      chunk.shift()
+    yield i
+      
 module.exports = {
   levels
   meanReversion
+  meanClose
+  meanVol
   indicator
   orderByRisk
   filterByStdev
+  levelVol
+  priceVol
 }

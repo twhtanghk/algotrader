@@ -1,4 +1,4 @@
-{Futu} = require 'futu'
+Futu = require('futu').default
 {filterByStdev} = require '../strategy'
 
 try

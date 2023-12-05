@@ -1,4 +1,4 @@
-{Futu} = require 'futu'
+Futu = require('futu').default
 {orderByRisk} = require '../strategy'
 
 try
