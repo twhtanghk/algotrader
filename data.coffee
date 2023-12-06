@@ -6,41 +6,23 @@ stats = require 'stats-lite'
 
 # stream to provide update of ohlc data for subscribed stocks
 class Stream extends Readable
-  # codes = {market, code} or [{market, code}, ....]
-  constructor: (@broker) ->
+  # futu, 'hk', '00700', '1d'
+  constructor: ({@broker, @market, @code, @freq}) ->
     super objectMode: true
-    # data: {market, code, timestamp, open, high, low, close, lastClose, volume, turnover} 
+
+    # data: {market, code, timestamp, open, high, low, close, volume, turnover} 
     @broker.on 'candle', (data) =>
-      @resume()
-      @push data
+      {market, code, freq} = data
+      if market == @market and code == @code and freq == @freq
+        @resume()
+        @push data
 
-  # subscribe stocks for ohlc data update and frequency for the update
-  subscribe: (codes, freq) ->
-    if not Array.isArray codes
-      codes = [codes]
+    return do =>
+      await @broker.subscribe {@market, @code, @freq}
+      @
 
-    do =>
-      {marketMap, subTypeMap} = @broker.constructor
-      for {market, code} in codes
-        await @broker.subscribe
-          market: marketMap[market]
-          code: code
-          subtype: subTypeMap[freq]
-    @
-
-  # unsubscribe stocks for ohlc data update and frequency for the update
-  unSubscribe: (codes, freq) ->
-    if not Array.isArray codes
-      codes = [codes]
-
-    do =>
-      {marketMap, subTypeMap} = @broker.constructor
-      for {market, code} in codes
-        await @broker.unSubscribe
-          market: marketMap[market]
-          code: code
-          subtype: subTypeMap[freq]
-    @
+  _destroy: ->
+    await @broker.unsubscribe {@market, @code, @freq}
 
   _read: ->
     @pause()

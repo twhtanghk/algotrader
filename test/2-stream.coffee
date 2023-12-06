@@ -8,8 +8,12 @@ do ->
   try 
     broker = await new Futu host: 'localhost', port: 33333
 
-    new Stream broker
-      .subscribe {market: 'hk', code: process.argv[2]}, '1'
+    stream = await new Stream
+      broker: broker
+      market: process.argv[2]
+      code: process.argv[3]
+      freq: 1
+    stream
       .on 'data', (data) ->
         data.timestamp = new Date data.timestamp * 1000
         console.log data
