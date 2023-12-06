@@ -68,8 +68,7 @@ data = ({broker, market, code, beginTime, freq}) ->
         .startOf 'month'
       endTime = moment beginTime
         .endOf 'month'
-  stream = (new Stream broker)
-    .subscribe {market, code}, freq
+  stream = (await new Stream {broker, market, code, freq})
   yield from await fromEmitter stream, onNext: 'data'
 
 ###
