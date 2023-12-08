@@ -106,12 +106,16 @@ orderByRisk = (broker, idx='HSI Constituent', chunkSize=180) ->
         
 # get constituent stock of input index and sortlisted those stocks
 # not falling within the range [mean - n * stdev, mean + n * stdev]
-filterByStdev = (broker, idx='HSI Constituent', chunkSize=60, n=2) ->
+filterByStdev = (opts={}) ->
+  {broker, idx, beginTime, chunkSize, n} = opts
+  idx ?= 'HSI Constituent'
+  beginTime ?= moment()
+    .subtract 6, 'month'
+  chunkSize ?= 60
+  n ?= 2
   list = await Promise
     .mapSeries (await constituent broker, idx), (code) ->
       await Promise.delay 1000
-      beginTime = moment()
-        .subtract 6, 'month'
       df = ->
         opts =
           broker: broker
