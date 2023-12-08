@@ -18,7 +18,7 @@ class Stream extends Readable
         @push data
 
     return do =>
-      await @broker.subscribe {@market, @code, @freq}
+      await @broker.subscribe {@market, @code, subtype: @broker.constructor.subTypeMap[@freq]}
       @
 
   _destroy: ->

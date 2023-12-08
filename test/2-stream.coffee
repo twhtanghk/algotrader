@@ -12,7 +12,7 @@ do ->
       broker: broker
       market: process.argv[2]
       code: process.argv[3]
-      freq: 1
+      freq: '1'
     stream
       .on 'data', (data) ->
         data.timestamp = new Date data.timestamp * 1000
