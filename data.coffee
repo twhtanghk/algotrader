@@ -100,7 +100,7 @@ data = ({broker, market, code, beginTime, freq}) ->
 constituent = (broker, idx='HSI Constituent') ->
   await broker.plateSecurity code: idx
 
-module.exports = {
+export default {
   Stream
   history
   data

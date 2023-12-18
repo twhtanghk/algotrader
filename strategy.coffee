@@ -137,6 +137,20 @@ filterByStdev = (opts={}) ->
     .sort (stockA, stockB) ->
       stockA.last['close.stdev'] - stockB.last['close.stdev']
 
+# input async generator of data series
+# keep history of last chunkSize of elements
+# filter those items satisfy the input predicate for last chunkSize of elements
+filter = (df, predicate, chunkSize=1) ->
+  chunk = []
+  for await i from df()
+    chunk.push i
+    if chunk.length == chunkSize
+      if predicate chunk
+        yield i
+      chunk.shift()
+    else
+      yield i
+
 # input generator of data series with indicators (levels, meanClose, meanVol)
 # if vol > vol['mean'] * (1 + volRatio)
 #   if df[2] is resistance level
@@ -184,7 +198,7 @@ priceVol = (df, volRatio=0.2) ->
       chunk.shift()
     yield i
       
-module.exports = {
+export default {
   levels
   meanReversion
   meanClose
@@ -192,6 +206,7 @@ module.exports = {
   indicator
   orderByRisk
   filterByStdev
+  filter
   levelVol
   priceVol
 }

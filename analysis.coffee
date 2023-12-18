@@ -48,7 +48,7 @@ levels = (df) ->
         ret.push [df[i].high, i]
   ret
 
-module.exports = 
+exports default
   ohlc: {
     isSupport
     isResistance
