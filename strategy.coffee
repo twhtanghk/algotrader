@@ -157,20 +157,27 @@ filter = (df, predicate, chunkSize=1) ->
 #     buy at close price
 #   if df[2] is support level
 #     sell at close price
-levelVol = (df, volRatio=0.2) ->
+levelVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
   chunk = []
   for await i from df()
     chunk.push i
     if chunk.length == 5
       if 'volume.mean' of i and i['volume'] > i['volume.mean'] * (1 + volRatio)
+        price = (i.high + i.low) / 2
         if ohlc.isSupport chunk, 2
           i.entryExit =
             side: 'buy'
-            price: i.close
+            plPrice: [
+              ((1 + plRatio[0]) * price).toFixed 2
+              ((1 - plRatio[1]) * price).toFixed 2
+            ]
         if ohlc.isResistance chunk, 2
           i.entryExit =
             side: 'sell'
-            price: i.close
+            plPrice: [
+              ((1 - plRatio[0]) * price).toFixed 2
+              ((1 + plRatio[1]) * price).toFixed 2
+            ]
       chunk.shift() 
     yield i
       
@@ -187,14 +194,21 @@ priceVol = (df, volRatio=0.2) ->
     if chunk.length == 3 
       [a, b, c] = chunk
       if 'volume.mean' of c and c['volume'] > c['volume.mean'] * (1 + volRatio) and a.volume > b.volume and b.volume > c.volume
+        price = (i.high + i.low) / 2
         if a.close > b.close and b.close > c.close
           i.entryExit =
             side: 'buy'
-            price: i.close
+            plPrice: [
+              ((1 + plRatio[0]) * price).toFixed 2
+              ((1 - plRatio[1]) * price).toFixed 2
+            ]
         if a.close < b.close and b.close < c.close
           i.entryExit =
             side: 'sell'
-            price: i.close
+            plPrice: [
+              ((1 - plRatio[0]) * price).toFixed 2
+              ((1 + plRatio[1]) * price).toFixed 2
+            ]
       chunk.shift()
     yield i
       
