@@ -2,8 +2,8 @@ Promise = require 'bluebird'
 moment = require 'moment'
 stats = require 'stats-lite'
 EventEmitter = require 'events'
-{constituent, history, data} = require './data'
-{ohlc} = require './analysis'
+{constituent, history, data} = require('./data').default
+{ohlc} = require('./analysis').default
 
 # compute support or resistance levels of df for specified chunkSize
 # return generator of elements with levels and breakout value
