@@ -48,28 +48,33 @@ history = ({broker, market, code, start, end, freq} = {}) ->
 
 # async generator to get ohlc data for specified broker, stock market and code,
 # beginTime, and freq
+# return generator and destroy function as {g, destroy} 
 data = ({broker, market, code, beginTime, freq}) ->
   market ?= 'hk'
   freq ?= '1'
-  if beginTime?
-    now = moment()
-    endTime = moment beginTime
-      .endOf 'month'
-    while beginTime.isBefore now
-      yield from await history 
-        broker: broker
-        market: market
-        code: code
-        start: beginTime
-        end: endTime
-        freq: freq
-      beginTime = beginTime
-        .add 1, 'month'
-        .startOf 'month'
+  stream = (await new Stream {broker, market, code, freq})
+  destroy = ->
+    stream.destroy()
+  g = ->
+    if beginTime?
+      now = moment()
       endTime = moment beginTime
         .endOf 'month'
-  stream = (await new Stream {broker, market, code, freq})
-  yield from await fromEmitter stream, onNext: 'data'
+      while beginTime.isBefore now
+        yield from await history 
+          broker: broker
+          market: market
+          code: code
+          start: beginTime
+          end: endTime
+          freq: freq
+        beginTime = beginTime
+          .add 1, 'month'
+          .startOf 'month'
+        endTime = moment beginTime
+          .endOf 'month'
+    yield from await fromEmitter stream, onNext: 'data'
+  {g, destroy}
 
 ###
 # get constituents stock of specified index
