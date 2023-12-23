@@ -22,7 +22,10 @@ class Stream extends Readable
       @
 
   _destroy: ->
-    await @broker.unsubscribe {@market, @code, @freq}
+    try
+      await @broker.unsubscribe {@market, @code, @freq}
+    catch err
+      console.error err
 
   _read: ->
     @pause()

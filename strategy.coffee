@@ -74,7 +74,7 @@ meanVol = (df, chunkSize=20) ->
 
 # supplement mean of close and vol, support and resistance levels
 # of last specified chunkSize elements for input generator of ohlc series  
-indicator = (df, [closeSize, volSize, levelSize]=[20, 20, 180]) ->
+indicator = (df, [closeSize, volSize, levelSize]=[20, 20, 180]) -> ->
   close = ->
     yield from await meanClose df, closeSize
   vol = ->
