@@ -1,4 +1,4 @@
-{Stream} = require '../data'
+{Stream} = require('../data').default
 Futu = require('futu').default
 
 debug = (obj) ->

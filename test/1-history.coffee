@@ -1,5 +1,5 @@
-{history} = require '../data'
-{Futu} = require 'futu'
+{history} = require('../data').default
+Futu = require('futu').default
 
 debug = (obj) ->
   console.log JSON.stringify obj, null, 2

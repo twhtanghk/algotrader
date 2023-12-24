@@ -1,23 +1,20 @@
 moment = require 'moment'
 Futu = require('futu').default
-{data} = require '../data'
-strategy = require '../strategy'
+{data} = require('../data').default
+strategy = require('../strategy').default
 
 try
   broker = await new Futu host: 'localhost', port: 33333
   [..., method, code] = process.argv
-  df = ->
-    yield from await data
-      broker: broker
-      market: 'hk'
-      code: code
-      beginTime: moment().subtract 2, 'month'
-      freq: '1'
-  ind = ->
-    yield from await strategy['indicator'] df
-  action = ->
-    yield from await strategy[method] ind
-  for await i from action()
+  {g, destroy} = await data
+    broker: broker
+    market: 'hk'
+    code: code
+    beginTime: moment().subtract 2, 'month'
+    freq: '1'
+  for await i from strategy[method] strategy['indicator'] g
+    i.time = new Date i.time * 1000
+    console.log i
     if process.env.DEBUG or 'entryExit' of i
       i.timestamp = new Date i.timestamp * 1000
       console.log JSON.stringify i, null, 2

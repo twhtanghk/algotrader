@@ -19,6 +19,7 @@
   "homepage": "https://github.com/twhtanghk/algotrader#readme",
   "dependencies": {
     "@async-generators/from-emitter": "^0.3.0",
+    "bluebird": "^3.7.2",
     "stats-lite": "^2.2.0"
   },
   "devDependencies": {

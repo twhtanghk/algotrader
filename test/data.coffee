@@ -1,6 +1,6 @@
 moment = require 'moment'
-{history, Stream, data} = require '../data'
-{Futu} = require 'futu'
+{history, Stream, data} = require('../data').default
+Futu = require('futu').default
 
 debug = (obj) ->
   console.error JSON.stringify obj, null, 2
@@ -16,7 +16,7 @@ do ->
       code: '00700'
 
     # create stream of live data
-    stream = new Stream broker
+    stream = new Stream {broker}
 
     # subscribe for live stock ohlc data of specified market and code
     stream.subscribe 
