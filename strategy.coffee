@@ -184,10 +184,10 @@ levelVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
 # input generator of data series with indicators (levels, meanClose, meanVol)
 # if vol > vol['mean'] * (1 + volRatio) and volume down trend
 #   if price up
-#     sell at close
+#     sell
 #   if price down
-#     buy at close
-priceVol = (df, volRatio=0.2) ->
+#     buy
+priceVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
   chunk = []
   for await i from df()
     chunk.push i
