@@ -41,22 +41,22 @@ levels = (df, chunkSize=180) ->
 
 # input generator of data series with indicators (levels, meanClose, meanVol)
 # yield entryExit
-#   for sell if close < close.mean + n * close.stdev
-#   for buy if close.mean - n * close.stdev < close
+#   for sell if close > close.mean + n * close.stdev
+#   for buy if close.mean - n * close.stdev > close
 meanReversion = (df, {chunkSize, n, plRatio}={}) ->
   chunkSize ?= 60
   n ?= 2
   plRatio ?= [0.01, 0.005]
   for await i from df()
     price = (i.high + i.low) / 2
-    if i['close'] < i['close.mean'] + n * i['close.stdev']
+    if i['close'] > i['close.mean'] + n * i['close.stdev']
       i.entryExit =
         side: 'sell'
         plPrice: [
           ((1 - plRatio[0]) * price).toFixed 2
           ((1 + plRatio[1]) * price).toFixed 2
         ]
-    if i['close.mean'] - n * i['close.stdev'] < i['close']
+    if i['close.mean'] - n * i['close.stdev'] > i['close']
       i.entryExit =
         side: 'buy'
         plPrice: [
