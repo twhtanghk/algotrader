@@ -97,7 +97,7 @@ orderByRisk = (broker, idx='HSI Constituent', chunkSize=180) ->
         for i in await history opts
           yield i
       last = null
-      for await i from indicator df
+      for await i from indicator(df)()
         last = i
       {code, last}
   list
@@ -124,10 +124,8 @@ filterByStdev = (opts={}) ->
           freq: '1d'
         for i in await history opts
           yield i
-      ind = -> 
-        yield from await indicator df
       last = null
-      for await i from ind() 
+      for await i from indicator(df)() 
         last = i
       {code, last}
   list
