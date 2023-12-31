@@ -4,6 +4,7 @@ stats = require 'stats-lite'
 EventEmitter = require 'events'
 {constituent, history, data} = require('./data').default
 {ohlc} = require('./analysis').default
+{lookBack} = require('generator').default
 
 # compute support or resistance levels of df for specified chunkSize
 # return generator of elements with levels and breakout value
@@ -38,47 +39,66 @@ levels = (df, chunkSize=180) ->
       yield last
       chunk.shift()
 
-# return generator of elements with mean, stdev of specified field
+# input generator of data series with indicators (levels, meanClose, meanVol)
+# yield entryExit
+#   for sell if close < close.mean + n * close.stdev
+#   for buy if close.mean - n * close.stdev < close
+meanReversion = (df, {chunkSize, n, plRatio}={}) ->
+  chunkSize ?= 60
+  n ?= 2
+  plRatio ?= [0.01, 0.005]
+  for await i from df()
+    price = (i.high + i.low) / 2
+    if i['close'] < i['close.mean'] + n * i['close.stdev']
+      i.entryExit =
+        side: 'sell'
+        plPrice: [
+          ((1 - plRatio[0]) * price).toFixed 2
+          ((1 + plRatio[1]) * price).toFixed 2
+        ]
+    if i['close.mean'] - n * i['close.stdev'] < i['close']
+      i.entryExit =
+        side: 'buy'
+        plPrice: [
+          ((1 + plRatio[0]) * price).toFixed 2
+          ((1 - plRatio[1]) * price).toFixed 2
+        ]
+    yield i
+    
+# return generator for elements with mean, stdev of specified field
 # for last chunkSize of elements
 # element[#{field}.trend] = -1 down trend if element[field] < mean - n * stdev
 # element[#{field}.trend] = 1 up trend if element[field] > mean + n * stdev
-# otherwise element[#{field}.trend] = 0
-meanReversion = (df, {field, chunkSize, n}) ->
+meanField = (df, {field, chunkSize, n}) -> ->
   chunkSize ?= 60
   n ?= 2
-  chunk = []
-  for await i from df()
-    chunk.push i
-    if chunk.length == chunkSize
-      series = chunk.map (data) ->
-        data[field]
-      i["#{field}.stdev"] = stats.stdev series
-      i["#{field}.mean"] = stats.mean series
-      
-      if i[field] < i["#{field}.mean"] - n * i["#{field}.stdev"]
-        i["#{field}.trend"] = -1
-      else if i[field] > i["#{field}.mean"] + n * i["#{field}.stdev"]
-        i["#{field}.trend"] = 1
-      else
-        i["#{field}.trend"] = 0
-      chunk.shift()
+  for await {i, chunk} from lookBack(df, chunkSize)()
+    series = chunk.map (j) -> j[field]
+    i["#{field}.stdev"] = stats.stdev series
+    i["#{field}.mean"] = stats.mean series
+    i["#{field}.trend"] = switch
+      when i[field] < i["#{field}.mean"] - n * i["#{field}.stdev"] then -1
+      when i[field] > i["#{field}.mean"] + n * i["#{field}.stdev"] then 1
+      else 0
     yield i
 
 # supplement mean of close value
-meanClose = (df, chunkSize=20) ->
-  yield from await meanReversion df, {field: 'close', chunkSize: chunkSize, n: 0}
+meanClose = (df, {chunkSize, n}={}) ->
+  chunkSize ?= 20
+  n ?= 2
+  meanField df, {field: 'close', chunkSize: chunkSize, n: n}
 
 # supplement mean of volume value
-meanVol = (df, chunkSize=20) ->
-  yield from await meanReversion df, {field: 'volume', chunkSize: chunkSize, n: 0}
+meanVol = (df, {chunkSize, n}={}) ->
+  chunkSize ?= 20
+  n ?= 0
+  meanField df, {field: 'volume', chunkSize: chunkSize, n: n}
 
 # supplement mean of close and vol, support and resistance levels
 # of last specified chunkSize elements for input generator of ohlc series  
 indicator = (df, [closeSize, volSize, levelSize]=[20, 20, 180]) -> ->
-  close = ->
-    yield from await meanClose df, closeSize
-  vol = ->
-    yield from await meanVol close, volSize
+  close = meanClose df, chunkSize: closeSize
+  vol = meanVol close, chunkSize: volSize
   yield from await levels vol, levelSize
 
 # get constituent stocks of input index and sort by risk (stdev)
@@ -213,6 +233,7 @@ priceVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
 export default {
   levels
   meanReversion
+  meanField
   meanClose
   meanVol
   indicator

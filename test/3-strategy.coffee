@@ -14,7 +14,6 @@ try
     freq: '1'
   for await i from strategy[method] strategy['indicator'] g
     i.time = new Date i.time * 1000
-    console.log i
     if process.env.DEBUG or 'entryExit' of i
       i.timestamp = new Date i.timestamp * 1000
       console.log JSON.stringify i, null, 2
