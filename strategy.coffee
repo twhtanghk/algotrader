@@ -4,7 +4,7 @@ stats = require 'stats-lite'
 EventEmitter = require 'events'
 {constituent, history, data} = require('./data').default
 {ohlc} = require('./analysis').default
-{lookBack} = require('generator').default
+{uniqBy, lookBack} = require('generator').default
 
 # compute support or resistance levels of df for specified chunkSize
 # return generator of elements with levels and breakout value
@@ -72,7 +72,7 @@ meanReversion = (df, {chunkSize, n, plRatio}={}) ->
 meanField = (df, {field, chunkSize, n}) -> ->
   chunkSize ?= 60
   n ?= 2
-  for await {i, chunk} from lookBack(df, chunkSize)()
+  for await {i, chunk} from lookBack(uniqBy(df), chunkSize)()
     series = chunk.map (j) -> j[field]
     i["#{field}.stdev"] = stats.stdev series
     i["#{field}.mean"] = stats.mean series
