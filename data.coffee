@@ -108,9 +108,22 @@ data = ({broker, market, code, beginTime, freq}) ->
 constituent = (broker, idx='HSI Constituent') ->
   await broker.plateSecurity code: idx
 
+freqDuration =
+  '1': week: 1
+  '5': week: 1
+  '15': week: 1
+  '30': week: 1
+  '1h': week: 1
+  '1d': year: 1
+  '1w': year: 10
+  '1m': year: 30
+  '3m': year: 30
+  '1y': year: 60
+
 export default {
   Stream
   history
   data
   constituent
+  freqDuration
 }
