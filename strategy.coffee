@@ -137,13 +137,11 @@ filterByStdev = (opts={}) ->
     .mapSeries (await constituent broker, idx), (code) ->
       await Promise.delay 1000
       df = ->
-        opts =
+        yield from await history
           broker: broker
           code: code
           beginTime: beginTime
           freq: '1d'
-        for i in await history opts
-          yield i
       last = null
       for await i from indicator(df)() 
         last = i
