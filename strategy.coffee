@@ -72,7 +72,7 @@ meanReversion = (df, {chunkSize, n, plRatio}={}) ->
 meanField = (df, {field, chunkSize, n}) -> ->
   chunkSize ?= 60
   n ?= 2
-  for await {i, chunk} from lookBack(uniqBy(df), chunkSize)()
+  for await {i, chunk} from lookBack(df, chunkSize)()
     series = chunk.map (j) -> j[field]
     i["#{field}.stdev"] = stats.stdev series
     i["#{field}.mean"] = stats.mean series
@@ -143,7 +143,7 @@ filterByStdev = (opts={}) ->
           beginTime: beginTime
           freq: '1d'
       last = null
-      for await i from indicator(df)() 
+      for await i from (meanClose meanVol df)() 
         last = i
       {code, last}
   list
