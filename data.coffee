@@ -5,81 +5,6 @@ import moment from 'moment'
 {ohlc} = require './analysis'
 stats = require 'stats-lite'
 
-# stream to provide update of ohlc data for subscribed stocks
-class Stream extends Readable
-  # futu, 'hk', '00700', '1d'
-  constructor: ({@broker, @market, @code, @freq}) ->
-    super objectMode: true
-
-    # data: {market, code, timestamp, open, high, low, close, volume, turnover} 
-    @broker.on 'candle', (data) =>
-      {market, code, freq} = data
-      if market == @market and code == @code and freq == @freq
-        @resume()
-        @push data
-
-    return do =>
-      await @broker.subscribe {@market, @code, subtype: @broker.constructor.subTypeMap[@freq]}
-      @
-
-  _destroy: ->
-    try
-      await @broker.unsubscribe {@market, @code, @freq}
-    catch err
-      console.error err
-
-  _read: ->
-    @pause()
-    
-# get history ohlc data for specified start/end time and update frequency
-history = ({broker, market, code, start, end, freq} = {}) ->
-  market ?= 'hk'
-  end ?= moment()
-  start ?= moment end
-    .subtract 6, 'month'
-  freq ?= '1d'
-  switch market
-    when 'hk'
-      {klList} = await broker
-        .historyKL
-          security:
-            market: broker.constructor.marketMap[market]
-            code: code
-          klType: broker.constructor.klTypeMap[freq]
-          beginTime: start.format 'YYYY-MM-DD'
-          endTime: end.format 'YYYY-MM-DD'
-      klList
-
-# async generator to get ohlc data for specified broker, stock market and code,
-# beginTime, and freq
-# return generator and destroy function as {g, destroy} 
-data = ({broker, market, code, beginTime, freq}) ->
-  market ?= 'hk'
-  freq ?= '1'
-  stream = (await new Stream {broker, market, code, freq})
-  destroy = ->
-    stream.destroy()
-  g = ->
-    if beginTime?
-      now = moment()
-      endTime = moment beginTime
-        .endOf 'month'
-      while beginTime.isBefore now
-        yield from await history 
-          broker: broker
-          market: market
-          code: code
-          start: beginTime
-          end: endTime
-          freq: freq
-        beginTime = beginTime
-          .add 1, 'month'
-          .startOf 'month'
-        endTime = moment beginTime
-          .endOf 'month'
-    yield from await fromEmitter stream, onNext: 'data'
-  {g, destroy}
-
 ###
 # get constituents stock of specified index
 # > index:
@@ -141,9 +66,6 @@ class Broker extends EventEmitter
 
 export default {
   Broker
-  Stream
-  history
-  data
   constituent
   freqDuration
 }
