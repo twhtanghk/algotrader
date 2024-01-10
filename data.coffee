@@ -1,4 +1,5 @@
-{Readable} = require 'stream'
+import {Readable} from 'stream'
+import {EventEmitter} from 'events'
 import fromEmitter from '@async-generators/from-emitter'
 import moment from 'moment'
 {ohlc} = require './analysis'
@@ -120,7 +121,26 @@ freqDuration =
   '3m': year: 30
   '1y': year: 60
 
+class Broker extends EventEmitter
+  historyKL: ({market, code, start, end, freq} = {}) ->
+    throw new Error 'calling Broker virtual method historyKL'
+  streamKL: ({market, code, freq} = {}) ->
+    throw new Error 'calling Broker virtual method streamKL'
+  dataKL: ({market, code, start, freq}) ->
+    freq ?= '1'
+    stream = @streamKL {market, code, freq}
+    destroy = ->
+      stream.destroy()
+    history = []
+    if start?
+      history = await @historyKL {market, code, start, freq, end: moment()}
+    g = ->
+      yield from history
+      yield from await fromEmitter stream, onNext: 'data'
+    {g, destroy}
+
 export default {
+  Broker
   Stream
   history
   data
