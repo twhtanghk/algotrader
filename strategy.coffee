@@ -110,11 +110,10 @@ orderByRisk = (broker, idx='HSI Constituent', chunkSize=180) ->
         .subtract 6, 'month'
       df = ->
         opts =
-          broker: broker
           code: code
-          beginTime: beginTime
+          start: beginTime
           freq: '1d'
-        for i in await history opts
+        for i in await broker.historyKL opts
           yield i
       last = null
       for await i from indicator(df)()
@@ -137,10 +136,10 @@ filterByStdev = (opts={}) ->
     .mapSeries (await constituent broker, idx), (code) ->
       await Promise.delay 1000
       df = ->
-        yield from await history
-          broker: broker
+        yield from await broker.historyKL
+          market: 'hk'
           code: code
-          beginTime: beginTime
+          start: beginTime
           freq: '1d'
       last = null
       for await i from (meanClose meanVol df)() 
