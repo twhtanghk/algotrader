@@ -53,7 +53,7 @@ class Broker extends EventEmitter
     throw new Error 'calling Broker virtual method streamKL'
   dataKL: ({market, code, start, freq}) ->
     freq ?= '1'
-    stream = @streamKL {market, code, freq}
+    stream = await @streamKL {market, code, freq}
     destroy = ->
       stream.destroy()
     history = []
