@@ -34,17 +34,38 @@ stats = require 'stats-lite'
 constituent = (broker, idx='HSI Constituent') ->
   await broker.plateSecurity code: idx
 
+# key: [actual duration, duration of data to be fetched]
 freqDuration =
-  '1': week: 1
-  '5': week: 1
-  '15': week: 1
-  '30': week: 1
-  '1h': week: 1
-  '1d': year: 1
-  '1w': year: 10
-  '1m': year: 30
-  '3m': year: 30
-  '1y': year: 60
+  '1': 
+    duration: minute: 1
+    dataFetched: week: 1
+  '5':
+    duration: minute: 5
+    dataFetched: week: 1
+  '15': 
+    duration: minute: 15
+    dataFetched: week: 1
+  '30': 
+    duration: minute: 30
+    dataFetched: week: 1
+  '1h':
+    duration: hour: 1
+    dataFetched: week: 1
+  '1d':
+    duration: day: 1
+    dataFetched: year: 1
+  '1w': 
+    duration: week: 1
+    dataFetched: year: 10
+  '1m': 
+    duration: month: 1
+    dataFetched: year: 30
+  '3m':
+    duration: month: 3
+    dataFetched: year: 30
+  '1y': 
+    duration: year: 1
+    dataFetched: year: 60
 
 class Broker extends EventEmitter
   historyKL: ({market, code, start, end, freq} = {}) ->
