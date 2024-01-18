@@ -67,6 +67,27 @@ freqDuration =
     duration: year: 1
     dataFetched: year: 60
 
+class Account extends EventEmitter
+  @orderStatus: [
+    'open'
+    'close'
+  ]
+  position: ->
+    throw new Error 'calling Account virtual method position'
+  historyOrder: ->
+    throw new Error 'calling Account virtual method historyOrder'
+  streamOrder: ->
+    throw new Error 'calling Account virtual method streamOrder'
+  placeOrder: (opts) ->
+    throw new Error 'calling Account virtual method placeOrder'
+  orders: ({start}) ->
+    history = []
+    if start?
+      history = await @historyOrder {start}
+    ->
+      yield from history
+      yield from await fromEmitter await @streamOrder()
+
 class Broker extends EventEmitter
   historyKL: ({market, code, start, end, freq} = {}) ->
     throw new Error 'calling Broker virtual method historyKL'
@@ -84,8 +105,11 @@ class Broker extends EventEmitter
       yield from history
       yield from await fromEmitter stream, onNext: 'data'
     {g, destroy}
+  accounts: ->
+    throw new Error 'calling Broker virtual method accounts'
 
 export default {
+  Account
   Broker
   constituent
   freqDuration
