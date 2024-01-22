@@ -67,14 +67,28 @@ freqDuration =
     duration: year: 1
     dataFetched: year: 60
 
+class Order extends EventEmitter
+  @SIDE: ['BUY', 'SELL']
+  @TYPE: ['LIMIT', 'MARKET']
+  @TIMEINFORCE: ['GTC']
+
+  constructor: ({account, code, side, type, price, quantity, timeInForce, createTime, updateTime}) ->
+    super()
+    @account = account
+    @code = code
+    @side = side || 'BUY'
+    @type = type || 'LIMIT'
+    @price = price
+    @quantity = quantity
+    @timeInForce = timeInForce || 'GTC'
+    @createTime = createTime
+    @updateTime = updateTime
+
 class Account extends EventEmitter
-  @orderStatus: [
-    'open'
-    'close'
-  ]
+  orderList: []
   position: ->
     throw new Error 'calling Account virtual method position'
-  historyOrder: ->
+  historyOrder: ({start, end}) ->
     throw new Error 'calling Account virtual method historyOrder'
   streamOrder: ->
     throw new Error 'calling Account virtual method streamOrder'
@@ -109,6 +123,7 @@ class Broker extends EventEmitter
     throw new Error 'calling Broker virtual method accounts'
 
 export default {
+  Order
   Account
   Broker
   constituent
