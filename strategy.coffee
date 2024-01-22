@@ -227,6 +227,36 @@ priceVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
       chunk.shift()
     yield i
       
+# buy at low price level
+# buy at mid grid level if price hits higher grid level
+# sell at mid grid level if price hits lower grid level
+# sell all at high price level
+gridTrend = (df, {low, high, gridSize, stopLoss}) ->
+  gridSize ?= 3
+  stopLoss ?= 0.01
+  levels = []
+  for i in [low..high] by (high - low) / gridSize
+    levels.push i
+  for await {i, chunk} from lookBack(df, 2)()
+    series = chunk.map ({close}) -> close
+    if series.length == 2
+      for price, index in levels
+        if series[0] < price and price < series[1]
+          i.entryExit =
+            side: 'buy'
+            plPrice: [
+              price
+              if index == 0 then low * (1 - stopLoss) else levels[index - 1]
+            ]
+        else if series[0] > price and price > series[1]
+          i.entryExit =
+            side: 'sell'
+            plPrice: [
+              if i == series.length - 1 then high * (1 + stopLoss) else levels[i - 1]
+              price
+            ]
+    yield i
+
 export default {
   levels
   meanReversion
@@ -239,4 +269,5 @@ export default {
   filter
   levelVol
   priceVol
+  gridTrend
 }
