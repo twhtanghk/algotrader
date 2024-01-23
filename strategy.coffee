@@ -51,6 +51,7 @@ meanReversion = (df, {chunkSize, n, plRatio}={}) ->
     price = (i.high + i.low) / 2
     if i['close'] > i['close.mean'] + n * i['close.stdev']
       i.entryExit =
+        strategy: 'meanReversion'
         side: 'sell'
         plPrice: [
           ((1 - plRatio[0]) * price).toFixed 2
@@ -58,6 +59,7 @@ meanReversion = (df, {chunkSize, n, plRatio}={}) ->
         ]
     if i['close.mean'] - n * i['close.stdev'] > i['close']
       i.entryExit =
+        strategy: 'meanReversion'
         side: 'buy'
         plPrice: [
           ((1 + plRatio[0]) * price).toFixed 2
@@ -181,6 +183,7 @@ levelVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
         price = (i.high + i.low) / 2
         if ohlc.isSupport chunk, 2
           i.entryExit =
+            strategy: 'levelVol'
             side: 'buy'
             plPrice: [
               ((1 + plRatio[0]) * price).toFixed 2
@@ -188,6 +191,7 @@ levelVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
             ]
         if ohlc.isResistance chunk, 2
           i.entryExit =
+            strategy: 'levelVol'
             side: 'sell'
             plPrice: [
               ((1 - plRatio[0]) * price).toFixed 2
@@ -212,6 +216,7 @@ priceVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
         price = (i.high + i.low) / 2
         if a.close > b.close and b.close > c.close
           i.entryExit =
+            strategy: 'priceVol'
             side: 'buy'
             plPrice: [
               ((1 + plRatio[0]) * price).toFixed 2
@@ -219,6 +224,7 @@ priceVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
             ]
         if a.close < b.close and b.close < c.close
           i.entryExit =
+            strategy: 'priceVol'
             side: 'sell'
             plPrice: [
               ((1 - plRatio[0]) * price).toFixed 2
@@ -234,27 +240,28 @@ priceVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
 gridTrend = (df, {low, high, gridSize, stopLoss}) ->
   gridSize ?= 3
   stopLoss ?= 0.01
-  levels = []
+  grids = []
   for i in [low..high] by (high - low) / gridSize
-    levels.push i
-  for await {i, chunk} from lookBack(df, 2)()
-    series = chunk.map ({close}) -> close
-    if series.length == 2
-      for price, index in levels
-        if series[0] < price and price < series[1]
-          i.entryExit =
-            side: 'buy'
-            plPrice: [
-              price
-              if index == 0 then low * (1 - stopLoss) else levels[index - 1]
-            ]
-        else if series[0] > price and price > series[1]
-          i.entryExit =
-            side: 'sell'
-            plPrice: [
-              if i == series.length - 1 then high * (1 + stopLoss) else levels[i - 1]
-              price
-            ]
+    grids.push i
+  for await i from df()
+    {open, close} = i
+    for price, index in grids
+      if i['close.trend'] == 1 and open < price and price < close
+        i.entryExit =
+          strategy: 'gridTrend'
+          side: 'buy'
+          plPrice: [
+            high
+            close * (1 - stopLoss)
+          ]
+      else if i['close.trend'] == -1 and open > price and price > close
+        i.entryExit =
+          strategy: 'gridTrend'
+          side: 'sell'
+          plPrice: [
+            low
+            close * (1 + stopLoss)
+          ]
     yield i
 
 export default {
