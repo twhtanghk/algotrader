@@ -21,6 +21,7 @@
     "@async-generators/from-emitter": "^0.3.0",
     "bluebird": "^3.7.2",
     "generator": "github:twhtanghk/generator",
+    "rxjs": "^7.8.1",
     "stats-lite": "^2.2.0"
   },
   "devDependencies": {

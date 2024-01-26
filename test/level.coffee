@@ -1,5 +1,5 @@
 moment = require 'moment'
-{Futu} = require 'futu'
+Futu = require('futu').default
 {data} = require '../data'
 {levels, meanReversion} = require '../strategy'
 
