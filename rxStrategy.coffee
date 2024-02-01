@@ -175,7 +175,6 @@ levelVol = ({volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
   (obs) ->
     obs
       .pipe bufferCount 5, 1
-      .pipe tap (x) -> console.log x
       .pipe map (chunk) ->
         i = chunk[2]
         if i['volume'] > i['volume.mean'] * (1 + volRatio)
