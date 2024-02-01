@@ -49,29 +49,30 @@ levels = (df, chunkSize=180) ->
 # yield entryExit
 #   for sell if close > close.mean + n * close.stdev
 #   for buy if close.mean - n * close.stdev > close
-meanReversion = (df, {chunkSize, n, plRatio}={}) ->
+meanReversion = ({chunkSize, n, plRatio}={}) -> (obs) ->
   chunkSize ?= 60
   n ?= 2
   plRatio ?= [0.01, 0.005]
-  for await i from df()
-    price = (i.high + i.low) / 2
-    if i['close'] > i['close.mean'] + n * i['close.stdev']
-      i.entryExit =
-        strategy: 'meanReversion'
-        side: 'sell'
-        plPrice: [
-          ((1 - plRatio[0]) * price).toFixed 2
-          ((1 + plRatio[1]) * price).toFixed 2
-        ]
-    if i['close.mean'] - n * i['close.stdev'] > i['close']
-      i.entryExit =
-        strategy: 'meanReversion'
-        side: 'buy'
-        plPrice: [
-          ((1 + plRatio[0]) * price).toFixed 2
-          ((1 - plRatio[1]) * price).toFixed 2
-        ]
-    yield i
+  obs
+    .pipe map (i) ->
+      price = (i.high + i.low) / 2
+      if i['close'] > i['close.mean'] + n * i['close.stdev']
+        i.entryExit =
+          strategy: 'meanReversion'
+          side: 'sell'
+          plPrice: [
+            ((1 - plRatio[0]) * price).toFixed 2
+            ((1 + plRatio[1]) * price).toFixed 2
+          ]
+      if i['close.mean'] - n * i['close.stdev'] > i['close']
+        i.entryExit =
+          strategy: 'meanReversion'
+          side: 'buy'
+          plPrice: [
+            ((1 + plRatio[0]) * price).toFixed 2
+            ((1 - plRatio[1]) * price).toFixed 2
+          ]
+      i
     
 # return generator for elements with mean, stdev of specified field
 # for last chunkSize of elements
@@ -110,14 +111,8 @@ indicator = (size=20) -> (obs) ->
         (_.pick (meanClose x), ['close.mean', 'close.stdev', 'close.trend']),
         (_.pick (meanVol x), ['volume.mean', 'volume.stdev', 'volume.trend'])
   zip obs, (concat (new Array size - 1), ret)
-    .pipe map ([org, ind]) ->
-      _.extend org, ind
-###    
-indicator = (df, [closeSize, volSize, levelSize]=[20, 20, 180]) -> ->
-  close = meanClose df, chunkSize: closeSize
-  vol = meanVol close, chunkSize: volSize
-  yield from await levels vol, levelSize
-###
+    .pipe map ([ohlc, ind]) ->
+      _.extend ohlc, ind
 
 # get constituent stocks of input index and sort by risk (stdev)
 orderByRisk = (broker, idx='HSI Constituent', chunkSize=180) ->
@@ -176,31 +171,32 @@ filterByStdev = (opts={}) ->
 #     buy at close price
 #   if df[2] is support level
 #     sell at close price
-levelVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
-  chunk = []
-  for await i from df()
-    chunk.push i
-    if chunk.length == 5
-      if 'volume.mean' of i and i['volume'] > i['volume.mean'] * (1 + volRatio)
-        price = (i.high + i.low) / 2
-        if ohlc.isSupport chunk, 2
-          i.entryExit =
-            strategy: 'levelVol'
-            side: 'buy'
-            plPrice: [
-              ((1 + plRatio[0]) * price).toFixed 2
-              ((1 - plRatio[1]) * price).toFixed 2
-            ]
-        if ohlc.isResistance chunk, 2
-          i.entryExit =
-            strategy: 'levelVol'
-            side: 'sell'
-            plPrice: [
-              ((1 - plRatio[0]) * price).toFixed 2
-              ((1 + plRatio[1]) * price).toFixed 2
-            ]
-      chunk.shift() 
-    yield i
+levelVol = ({volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
+  (obs) ->
+    obs
+      .pipe bufferCount 5, 1
+      .pipe tap (x) -> console.log x
+      .pipe map (chunk) ->
+        i = chunk[2]
+        if i['volume'] > i['volume.mean'] * (1 + volRatio)
+          price = (i.high + i.low) / 2
+          if ohlc.isSupport chunk, 2
+            i.entryExit =
+              strategy: 'levelVol'
+              side: 'buy'
+              plPrice: [
+                ((1 + plRatio[0]) * price).toFixed 2
+                ((1 - plRatio[1]) * price).toFixed 2
+              ]
+          if ohlc.isResistance chunk, 2
+            i.entryExit =
+              strategy: 'levelVol'
+              side: 'sell'
+              plPrice: [
+                ((1 - plRatio[0]) * price).toFixed 2
+                ((1 + plRatio[1]) * price).toFixed 2
+              ]
+        i
       
 # input generator of data series with indicators (levels, meanClose, meanVol)
 # if vol > vol['mean'] * (1 + volRatio) and volume down trend
