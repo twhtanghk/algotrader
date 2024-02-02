@@ -63,7 +63,7 @@ meanBar = -> (obs) ->
     .pipe map ([ohlc, meanBar]) ->
       _.extend ohlc, meanBar: [
         meanBar.toFixed 2
-        (meanBar / ohlc.close).toFixed 2
+        (meanBar * 100 / ohlc.close).toFixed 2
       ]     
 
 export default
