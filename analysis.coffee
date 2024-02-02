@@ -1,3 +1,5 @@
+import {scan, zip, map} from 'rxjs'
+
 # input time ascending order of ohlc data
 # i.e. [
 #   {date, open, high, low, close}
@@ -48,6 +50,22 @@ levels = (df) ->
         ret.push [df[i].high, i]
   ret
 
+# mean of ohlc high and low difference
+meanBar = -> (obs) ->
+  reducer = (sum, x) ->
+    {high, low} = x
+    sum + Math.abs(high - low)
+  meanBar = obs
+    .pipe scan reducer, 0
+    .pipe map (sum, i) ->
+      sum / (i + 1)
+  (zip obs, meanBar)
+    .pipe map ([ohlc, meanBar]) ->
+      _.extend ohlc, meanBar: [
+        meanBar.toFixed 2
+        (meanBar / ohlc.close).toFixed 2
+      ]     
+
 export default
   ohlc: {
     isSupport
@@ -55,4 +73,5 @@ export default
     mean
     meanDiff
     levels
+    meanBar
   }
