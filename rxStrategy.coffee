@@ -87,6 +87,7 @@ meanField = (ohlc, {field, n}) ->
   ret['timestamp'] = end['timestamp']
   ret["#{field}.stdev"] = stats.stdev series
   ret["#{field}.mean"] = stats.mean series
+  ret["#{field}.volatility"] = Math.sqrt(ret["#{field}.stdev"] / ohlc.length)
   ret["#{field}.trend"] = switch
     when end[field] < ret["#{field}.mean"] - n * ret["#{field}.stdev"] then -1
     when end[field] > ret["#{field}.mean"] + n * ret["#{field}.stdev"] then 1
@@ -108,7 +109,7 @@ indicator = (size=20) -> (obs) ->
     .pipe bufferCount size, 1
     .pipe map (x) ->
       _.extend {},
-        (_.pick (meanClose x), ['close.mean', 'close.stdev', 'close.trend']),
+        (_.pick (meanClose x), ['close.mean', 'close.stdev', 'close.trend', 'close.volatility']),
         (_.pick (meanVol x), ['volume.mean', 'volume.stdev', 'volume.trend'])
   zip obs, (concat (new Array size - 1), ret)
     .pipe map ([ohlc, ind]) ->
