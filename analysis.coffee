@@ -1,4 +1,4 @@
-import {scan, zip, map} from 'rxjs'
+import {bufferCount, filter, scan, zip, map} from 'rxjs'
 
 # input time ascending order of ohlc data
 # i.e. [
@@ -66,6 +66,15 @@ meanBar = -> (obs) ->
         (meanBar * 100 / ohlc.close).toFixed 2
       ]     
 
+# skip duplicate time elements
+skipDup = -> (obs) ->
+  obs
+    .pipe bufferCount 2, 1
+    .pipe filter ([prev, curr]) ->
+      prev.time != curr.time
+    .pipe map ([prev, curr]) ->
+      prev
+    
 export default
   ohlc: {
     isSupport
@@ -74,4 +83,5 @@ export default
     meanDiff
     levels
     meanBar
+    skipDup
   }
