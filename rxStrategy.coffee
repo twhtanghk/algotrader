@@ -231,36 +231,51 @@ priceVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
       chunk.shift()
     yield i
       
-# buy at low price level
-# buy at mid grid level if price hits higher grid level
-# sell at mid grid level if price hits lower grid level
-# sell all at high price level
-gridTrend = (df, {low, high, gridSize, stopLoss}) ->
+# see https://www.linkedin.com/pulse/grid-trading-forex-markets-cmsprime-mz0df
+# grid trading strategy
+# type = range or trend
+grid = ({type, low, high, gridSize, stopLoss}) -> (obs) ->
   gridSize ?= 3
   stopLoss ?= 0.01
   grids = []
+  typeMap =
+    range: ['sell', 'buy']
+    trend: ['buy', 'sell']
   for i in [low..high] by (high - low) / gridSize
     grids.push i
-  for await i from df()
-    {open, close} = i
-    for price, index in grids
-      if i['close.trend'] == 1 and open < price and price < close
-        i.entryExit =
-          strategy: 'gridTrend'
-          side: 'buy'
-          plPrice: [
-            high
-            close * (1 - stopLoss)
-          ]
-      else if i['close.trend'] == -1 and open > price and price > close
-        i.entryExit =
-          strategy: 'gridTrend'
-          side: 'sell'
-          plPrice: [
-            low
-            close * (1 + stopLoss)
-          ]
-    yield i
+  obs
+    .pipe map (i) ->
+      {open, close} = i
+      for price, index in grids
+        if i['close.trend'] == 1 and open < price and price < close
+          i.entryExit =
+            strategy: "grid #{type}"
+            side: typeMap[type][0]
+            plPrice: [
+              high
+              close * (1 - stopLoss)
+            ]
+        else if i['close.trend'] == -1 and open > price and price > close
+          i.entryExit =
+            strategy: "grid #{type}"
+            side: typeMap[type][1]
+            plPrice: [
+              low
+              close * (1 + stopLoss)
+            ]
+      i
+
+# ranging market condition
+# sell at mid grid level if price hits higher grid level
+# buy at mid grid level if price hits lower grid level
+gridRange = ({low, high, gridSize, stopLoss}={}) -> (obs) ->
+  grid({type: 'range', low, high, gridSize, stopLoss})(obs)
+
+# trend market condition
+# buy at mid grid level if price hits higher grid level
+# sell at mid grid level if price hits lower grid level
+gridTrend = ({low, high, gridSize, stopLoss}={}) -> (obs) ->
+  grid({type: 'trend', low, high, gridSize, stopLoss})(obs)
 
 export default {
   levels
@@ -274,4 +289,5 @@ export default {
   levelVol
   priceVol
   gridTrend
+  gridRange
 }
