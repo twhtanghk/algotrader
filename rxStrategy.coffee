@@ -8,42 +8,33 @@ EventEmitter = require 'events'
 {uniqBy, lookBack} = require('generator').default
 import {tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
 
-# compute support or resistance levels of df for specified chunkSize
-# return generator of elements with levels and breakout value
-# 1 : if ohlc data breakout for resistance level and 
-#     higher than last close
-# -1: if ohlc data breakout for support level and 
-#     lower than last close
-# 0 : no breakout
-levels = (df, chunkSize=180) ->
-  df
-    .pipe bufferCount chunkSize
-###
-  chunk = []
-  for await i from df()
-    chunk.push i
-    if chunk.length < chunkSize
-      yield i
-    else if chunk.length == chunkSize
-      [..., last] = chunk
-      last.levels = ohlc 
-        .levels chunk
-        .map ([price, idx]) ->
-          price
-        .sort (a, b) ->
-          a - b
-      last.breakout = 0
-      for l in last.levels
-        sign = Math.sign(last.close - last.lastClose)
-        # upward breakout for one of existing levels
-        if sign == 1 and last.lastClose < l and l < last.close
-          last.breakout = 1
-        # downward breakout for one of existing levels
-        else if sign == -1 and last.lastClose > l and l > last.close
-          last.breakout = -1
-      yield last
-      chunk.shift()
-###
+# provide entryExit according to input support or resistance levels array
+levels = ({arr, plRatio}) -> (obs) ->
+  plRatio ?= [0.01, 0.005]
+  obs
+    .pipe map (i) ->
+      {low, high, open, close} = i
+      price = (high + low) / 2
+      found = arr.find (l) ->
+        low < l and l < high
+      if found?
+        if open < close
+          i.entryExit =
+            strategy: 'levels'
+            side: 'buy'
+            plPrice: [
+              ((1 + plRatio[0]) * price).toFixed 2
+              ((1 - plRatio[1]) * price).toFixed 2
+            ]
+        else if open > close
+          i.entryExit =
+            strategy: 'levels'
+            side: 'sell'
+            plPrice: [
+              ((1 - plRatio[0]) * price).toFixed 2
+              ((1 + plRatio[1]) * price).toFixed 2
+            ]
+      i    
 
 # input generator of data series with indicators (levels, meanClose, meanVol)
 # yield entryExit
