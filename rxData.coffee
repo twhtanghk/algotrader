@@ -68,40 +68,34 @@ freqDuration =
     duration: year: 1
     dataFetched: year: 60
 
-class Order extends EventEmitter
-  @SIDE: ['BUY', 'SELL']
-  @TYPE: ['LIMIT', 'MARKET']
-  @TIMEINFORCE: ['GTC']
+class Order extends Subject
+  @SIDE: ['buy', 'sell']
+  @TYPE: ['limit', 'market']
+  @TIMEINFORCE: ['gtc']
 
-  constructor: ({account, code, side, type, price, quantity, timeInForce, createTime, updateTime}) ->
+  constructor: ({@account, @code, @name, @side, @type, @status, @price, @qty, @timeInForce, @createTime, @updateTime}) ->
     super()
-    @account = account
-    @code = code
-    @side = side || 'BUY'
-    @type = type || 'LIMIT'
-    @price = price
-    @quantity = quantity
-    @timeInForce = timeInForce || 'GTC'
-    @createTime = createTime
-    @updateTime = updateTime
+    @type ?= 'LIMIT'
+    @timeInForce ?= 'GTC'
+    @createTime ?= moment().unix()
 
-class Account extends EventEmitter
+  toJSON: ->
+    {@code, @name, @side, @type, @price, @qty, @timeInForce, @createTime, @updateTime}
+
+class Account extends Subject
   orderList: []
   position: ->
     throw new Error 'calling Account virtual method position'
-  historyOrder: ({start, end}) ->
+  historyOrder: ({beginTime, endTime}) ->
     throw new Error 'calling Account virtual method historyOrder'
   streamOrder: ->
     throw new Error 'calling Account virtual method streamOrder'
-  placeOrder: (opts) ->
-    throw new Error 'calling Account virtual method placeOrder'
-  orders: ({start}) ->
-    history = []
-    if start?
-      history = await @historyOrder {start}
-    ->
-      yield from history
-      yield from await fromEmitter await @streamOrder()
+  placeOrder: (order) ->
+    @orderList.push order
+    @next {action: 'created', order}
+  orders: ({beginTime}={}) ->
+    beginTime ?= moment().subtract week: 1
+    concat (await @historyOrder {beginTime}), (await @streamOrder())
 
 class Broker extends Subject
   constructor: ->
