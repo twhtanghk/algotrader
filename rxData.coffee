@@ -73,14 +73,14 @@ class Order extends Subject
   @TYPE: ['limit', 'market']
   @TIMEINFORCE: ['gtc']
 
-  constructor: ({@account, @code, @name, @side, @type, @status, @price, @qty, @timeInForce, @createTime, @updateTime}) ->
+  constructor: ({@account, @id, @code, @name, @side, @type, @status, @price, @qty, @timeInForce, @createTime, @updateTime}) ->
     super()
     @type ?= 'LIMIT'
     @timeInForce ?= 'GTC'
     @createTime ?= moment().unix()
 
   toJSON: ->
-    {@code, @name, @side, @type, @price, @qty, @timeInForce, @createTime, @updateTime}
+    {@id, @code, @name, @side, @type, @status, @price, @qty, @timeInForce, @createTime, @updateTime}
 
 class Account extends Subject
   orderList: []
@@ -92,7 +92,8 @@ class Account extends Subject
     throw new Error 'calling Account virtual method streamOrder'
   placeOrder: (order) ->
     @orderList.push order
-    @next {action: 'created', order}
+  cancelOrder: (order) ->
+    throw new Error 'calling Account virtual method cancelOrder'
   orders: ({beginTime}={}) ->
     beginTime ?= moment().subtract week: 1
     concat (await @historyOrder {beginTime}), (await @streamOrder())
