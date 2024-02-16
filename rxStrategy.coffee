@@ -137,7 +137,7 @@ filterByStdev = (opts={}) ->
     .subtract 6, 'month'
   chunkSize ?= 60
   n ?= 2
-  await Promise.mapSeries (await constituent broker, idx), (code) ->
+  await Promise.mapSeries (await constituent broker, idx), ({code, name}) ->
     await Promise.delay 1000
     opts =
       market: 'hk'
@@ -150,12 +150,10 @@ filterByStdev = (opts={}) ->
         ret =
           market: opts.market
           code: opts.code
+          name: name
           freq: opts.freq
         [..., end] = x
         _.extend ret, end, (meanClose x), (meanVol x)
-      .pipe filter (x) ->
-        x['close'] <= x['close.mean'] - n * x['close.stdev'] or
-        x['close'] >= x['close.mean'] + n * x['close.stdev']
 
 # input generator of data series with indicators (levels, meanClose, meanVol)
 # if vol > vol['mean'] * (1 + volRatio)
