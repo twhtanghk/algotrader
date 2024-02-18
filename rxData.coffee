@@ -1,5 +1,5 @@
 _ = require 'lodash'
-import {Subject, merge, concat, filter, tap} from 'rxjs'
+import {Subject, from, merge, concat, filter, tap, map} from 'rxjs'
 import {Readable} from 'stream'
 import {EventEmitter} from 'events'
 import fromEmitter from '@async-generators/from-emitter'
@@ -100,7 +100,19 @@ class Account extends Subject
   cancelOrder: (order) ->
     throw new Error 'calling Account virtual method cancelOrder'
   orders: ({beginTime}={}) ->
-    (merge (await @historyOrder {beginTime}), (await @streamOrder()), @)
+    history = (await @historyOrder {beginTime})
+      .pipe map (order) ->
+        type: 'orderList'
+        data: order
+    brokerUpdate = (await @streamOrder())
+      .pipe map (order) ->
+        type: 'orderChg'
+        data: order
+    queued = (from @orderList)
+      .pipe map (order) ->
+        type: 'orderList'
+        data: order
+    (merge history, brokerUpdate, queued, @)
       .pipe filter ({type}) ->
         type.match /order.*/
 
@@ -119,6 +131,8 @@ class Broker extends Subject
     throw new Error 'calling Broker virtual method accounts'
   defaultAcc: ->
     (await @accounts())[0]
+  orderBook: ({market, code}) ->
+    throw new Error 'calling Broker virtual method orderBook'
 
 export default {
   Order
