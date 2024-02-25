@@ -105,6 +105,7 @@ class Account extends Subject
         type: 'orderList'
         data: order
     brokerUpdate = (await @streamOrder())
+      .pipe tap console.log
       .pipe map (order) ->
         type: 'orderChg'
         data: order
