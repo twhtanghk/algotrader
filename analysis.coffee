@@ -67,11 +67,11 @@ meanBar = -> (obs) ->
       ]     
 
 # skip duplicate time elements
-skipDup = -> (obs) ->
+skipDup = (field='time') -> (obs) ->
   obs
     .pipe bufferCount 2, 1
     .pipe filter ([prev, curr]) ->
-      prev.time != curr.time
+      prev[field] != curr[field]
     .pipe map ([prev, curr]) ->
       prev
     
