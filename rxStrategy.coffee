@@ -78,7 +78,6 @@ meanField = (ohlc, {field, n}) ->
   ret['timestamp'] = end['timestamp']
   ret["#{field}.stdev"] = stats.stdev series
   ret["#{field}.mean"] = stats.mean series
-  ret["#{field}.volatility"] = Math.sqrt(ret["#{field}.stdev"] / ohlc.length)
   ret["#{field}.trend"] = switch
     when end[field] < ret["#{field}.mean"] - n * ret["#{field}.stdev"] then -1
     when end[field] > ret["#{field}.mean"] + n * ret["#{field}.stdev"] then 1
