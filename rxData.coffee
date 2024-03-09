@@ -1,11 +1,7 @@
 _ = require 'lodash'
-import {Subject, from, merge, concat, filter, tap, map} from 'rxjs'
-import {Readable} from 'stream'
-import {EventEmitter} from 'events'
-import fromEmitter from '@async-generators/from-emitter'
+import {Subject, take, from, merge, concat, filter, tap, map} from 'rxjs'
 import moment from 'moment'
 {ohlc} = require './analysis'
-stats = require 'stats-lite'
 
 ###
 # get constituents stock of specified index
@@ -134,6 +130,17 @@ class Broker extends Subject
     (await @accounts())[0]
   orderBook: ({market, code}) ->
     throw new Error 'calling Broker virtual method orderBook'
+  quickQuote: ({market, code}) ->
+    new Promise (resolve, reject) =>
+      subscription = (await @orderBook {market, code})
+        .pipe take 1
+        .subscribe 
+          next: ({bid, ask}) ->
+            subscription.unsubscribe()
+            resolve 
+              buy: bid[0].price
+              sell: ask[0].price
+          error: reject
 
 export default {
   Order
