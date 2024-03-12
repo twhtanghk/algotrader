@@ -5,7 +5,6 @@ stats = require 'stats-lite'
 EventEmitter = require 'events'
 {constituent, history, data} = require('./rxData').default
 {ohlc} = require('./analysis').default
-{uniqBy, lookBack} = require('generator').default
 import {tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
 
 # provide entryExit according to input support or resistance levels array
