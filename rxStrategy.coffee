@@ -5,7 +5,7 @@ stats = require 'stats-lite'
 EventEmitter = require 'events'
 {constituent, history, data} = require('./rxData').default
 {ohlc} = require('./analysis').default
-import {tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
+import {take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
 
 # provide entryExit according to input support or resistance levels array
 levels = ({arr, plRatio}) -> (obs) ->
@@ -270,6 +270,42 @@ volUp = (n) -> (obs) ->
   obs.pipe filter (i) ->
     i['volume'] > i['volume.mean'] + n * i['volume.stdev']
 
+# https://blueberrymarkets.com/learn/advanced/price-action-trading-strategy/
+# pin bar with long lower or upper wick
+pinBar = (percent=50) -> (obs) ->
+  obs
+    .pipe map (i) ->
+      {high, low, open, close} = i
+      if high - Math.max(open, close) > (high - low) * percent / 100
+        i.entryExit =
+          strategy: 'pinBar'
+          side: 'sell'
+      else if Math.min(open, close) - low > (high - low) * percent / 100
+        i.entryExit =
+          strategy: 'pinBar'
+          side: 'buy'
+      i
+
+# inside bar reversal
+insideBar = -> (obs) ->
+  decision = [
+    {mb: -1, ib: -1, action: 'sell'}
+    {mb: -1, ib: 1, action: 'buy'}
+    {mb: 1, ib: -1, action: 'sell'}
+    {mb: 1, ib: 1, action: 'buy'}
+  ]
+  first = obs
+    .pipe take 1
+  next = obs
+    .pipe bufferCount 2, 1
+    .pipe map ([a, b]) ->
+      if a.high > b.high and a.low < b.low
+        b.entryExit =
+          strategy: 'insideBar'
+          side: (_.find mb: a.close - a.open, ib: b.close - b.open).action
+      b
+  concat first, next
+
 export default {
   levels
   meanReversion
@@ -284,4 +320,6 @@ export default {
   gridTrend
   gridRange
   volUp
+  pinBar
+  insideBar
 }
