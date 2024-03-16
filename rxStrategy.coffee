@@ -325,7 +325,7 @@ insideBar = -> (obs) ->
         b.entryExit ?= []
         b.entryExit.push
           strategy: 'insideBar'
-          side: found.action
+          side: found?.action
       b
   concat first, next
 
