@@ -18,7 +18,8 @@ levels = ({arr, plRatio}) -> (obs) ->
         low < l and l < high
       if found?
         if open < close
-          i.entryExit =
+          i.entryExit ?= []
+          i.entryExit.push
             strategy: 'levels'
             side: 'buy'
             plPrice: [
@@ -26,7 +27,8 @@ levels = ({arr, plRatio}) -> (obs) ->
               ((1 - plRatio[1]) * price).toFixed 2
             ]
         else if open > close
-          i.entryExit =
+          i.entryExit ?= []
+          i.entryExit.push
             strategy: 'levels'
             side: 'sell'
             plPrice: [
@@ -47,7 +49,8 @@ meanReversion = ({chunkSize, n, plRatio}={}) -> (obs) ->
     .pipe map (i) ->
       price = (i.high + i.low) / 2
       if i['close'] > i['close.mean'] + n * i['close.stdev']
-        i.entryExit =
+        i.entryExit ?= []
+        i.entryExit.push
           strategy: 'meanReversion'
           side: 'sell'
           plPrice: [
@@ -55,7 +58,8 @@ meanReversion = ({chunkSize, n, plRatio}={}) -> (obs) ->
             ((1 + plRatio[1]) * price).toFixed 2
           ]
       if i['close.mean'] - n * i['close.stdev'] > i['close']
-        i.entryExit =
+        i.entryExit ?= []
+        i.entryExit.push
           strategy: 'meanReversion'
           side: 'buy'
           plPrice: [
@@ -168,7 +172,8 @@ levelVol = ({volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
         if i['volume'] > i['volume.mean'] * (1 + volRatio)
           price = (i.high + i.low) / 2
           if ohlc.isSupport chunk, 2
-            i.entryExit =
+            i.entryExit ?= []
+            i.entryExit.push
               strategy: 'levelVol'
               side: 'buy'
               plPrice: [
@@ -176,7 +181,8 @@ levelVol = ({volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
                 ((1 - plRatio[1]) * price).toFixed 2
               ]
           if ohlc.isResistance chunk, 2
-            i.entryExit =
+            i.entryExit ?= []
+            i.entryExit.push
               strategy: 'levelVol'
               side: 'sell'
               plPrice: [
@@ -200,7 +206,8 @@ priceVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
       if 'volume.mean' of c and c['volume'] > c['volume.mean'] * (1 + volRatio) and a.volume > b.volume and b.volume > c.volume
         price = (i.high + i.low) / 2
         if a.close > b.close and b.close > c.close
-          i.entryExit =
+          i.entryExit ?= []
+          i.entryExit.push
             strategy: 'priceVol'
             side: 'buy'
             plPrice: [
@@ -208,7 +215,8 @@ priceVol = (df, {volRatio, plRatio}={volRatio: 0.2, plRatio: [0.01, 0.005]}) ->
               ((1 - plRatio[1]) * price).toFixed 2
             ]
         if a.close < b.close and b.close < c.close
-          i.entryExit =
+          i.entryExit ?= []
+          i.entryExit.push
             strategy: 'priceVol'
             side: 'sell'
             plPrice: [
@@ -235,7 +243,8 @@ grid = ({type, low, high, gridSize, stopLoss}) -> (obs) ->
       {open, close} = i
       for price, index in grids
         if i['close.trend'] == 1 and open < price and price < close
-          i.entryExit =
+          i.entryExit ?= []
+          i.entryExit.push
             strategy: "grid #{type}"
             side: typeMap[type][0]
             plPrice: [
@@ -243,7 +252,8 @@ grid = ({type, low, high, gridSize, stopLoss}) -> (obs) ->
               close * (1 - stopLoss)
             ]
         else if i['close.trend'] == -1 and open > price and price > close
-          i.entryExit =
+          i.entryExit ?= []
+          i.entryExit.push
             strategy: "grid #{type}"
             side: typeMap[type][1]
             plPrice: [
@@ -272,16 +282,19 @@ volUp = (n) -> (obs) ->
 
 # https://blueberrymarkets.com/learn/advanced/price-action-trading-strategy/
 # pin bar with long lower or upper wick
-pinBar = (percent=50) -> (obs) ->
+pinBar = ({percent}={}) -> (obs) ->
+  percent ?= 50
   obs
     .pipe map (i) ->
       {high, low, open, close} = i
       if high - Math.max(open, close) > (high - low) * percent / 100
-        i.entryExit =
+        i.entryExit ?= []
+        i.entryExit.push
           strategy: 'pinBar'
           side: 'sell'
       else if Math.min(open, close) - low > (high - low) * percent / 100
-        i.entryExit =
+        i.entryExit ?= []
+        i.entryExit.push
           strategy: 'pinBar'
           side: 'buy'
       i
@@ -299,10 +312,14 @@ insideBar = -> (obs) ->
   next = obs
     .pipe bufferCount 2, 1
     .pipe map ([a, b]) ->
+      found = _.find decision,
+        mb: Math.sign(a.close - a.open)
+        ib: Math.sign(b.close - b.open)
       if a.high > b.high and a.low < b.low
-        b.entryExit =
+        b.entryExit ?= []
+        b.entryExit.push
           strategy: 'insideBar'
-          side: (_.find mb: a.close - a.open, ib: b.close - b.open).action
+          side: found.action
       b
   concat first, next
 
