@@ -275,10 +275,16 @@ gridTrend = ({low, high, gridSize, stopLoss}={}) -> (obs) ->
   grid({type: 'trend', low, high, gridSize, stopLoss})(obs)
 
 # volume higher than n * stdev
-volUp = (n) -> (obs) ->
+volUp = ({n}={}) -> (obs) ->
   n ?= 2
-  obs.pipe filter (i) ->
-    i['volume'] > i['volume.mean'] + n * i['volume.stdev']
+  obs
+    .pipe map (i) ->
+      if i['volume'] > i['volume.mean'] + n * i['volume.stdev']
+        i.entryExit ?= []
+        i.entryExit.push
+          strategy: 'volUp'
+          side: true
+      i
 
 # https://blueberrymarkets.com/learn/advanced/price-action-trading-strategy/
 # pin bar with long lower or upper wick
