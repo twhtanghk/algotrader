@@ -95,6 +95,19 @@ meanClose = (ohlc) ->
 meanVol = (df) ->
   meanField df, {field: 'volume'}
 
+# stdev of specifed field
+stdev = (field, size=20) -> (obs) ->
+  ret = obs
+    .pipe bufferCount size, 1
+    .pipe map (x) ->
+      series = x.map (i) -> i[field]
+      ind = {}
+      ind["#{field}.stdev"] = stats.stdev series
+      ind
+  zip obs, (concat (new Array size - 1), ret)
+    .pipe map ([ohlc, ind]) ->
+      _.extend ohlc, ind
+
 # supplement mean of close and vol, support and resistance levels
 # of last specified chunkSize elements for input generator of ohlc series  
 indicator = (size=20) -> (obs) ->
@@ -107,6 +120,7 @@ indicator = (size=20) -> (obs) ->
   zip obs, (concat (new Array size - 1), ret)
     .pipe map ([ohlc, ind]) ->
       _.extend ohlc, ind
+    .pipe stdev 'close.stdev'
 
 # get constituent stocks of input index and sort by risk (stdev)
 orderByRisk = (broker, idx='HSI Constituent', chunkSize=180) ->
@@ -335,6 +349,7 @@ export default {
   meanField
   meanClose
   meanVol
+  stdev
   indicator
   orderByRisk
   filterByStdev
