@@ -71,7 +71,7 @@ skipDup = (field='time') -> (obs) ->
   obs
     .pipe bufferCount 2, 1
     .pipe filter ([prev, curr]) ->
-      prev[field] != curr[field]
+      prev?[field] != curr?[field]
     .pipe map ([prev, curr]) ->
       prev
     
