@@ -5,8 +5,40 @@ stats = require 'stats-lite'
 EventEmitter = require 'events'
 {constituent, history, data} = require('./rxData').default
 {ohlc} = require('./analysis').default
-import {take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
+import {skipLast, take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
 
+support = (field='low') -> (obs) ->
+  first = obs
+    .pipe take 2
+  curr = obs
+    .pipe bufferCount 5, 1
+    .pipe skipLast 2
+    .pipe map (x) ->
+      ret = x[0][field] > x[1][field] and 
+        x[1][field] > x[2][field] and 
+        x[2][field] < x[3][field] and 
+        x[3][field] < x[4][field]
+      if ret
+        _.extend x[2], support: ret
+      x[2]
+  concat first, curr
+      
+resistance = (field='high') -> (obs) ->
+  first = obs
+    .pipe take 2
+  curr = obs
+    .pipe bufferCount 5, 1
+    .pipe skipLast 2
+    .pipe map (x) ->
+      ret = x[0][field] < x[1][field] and
+        x[1][field] < x[2][field] and
+        x[2][field] > x[3][field] and
+        x[3][field] > x[4][field]
+      if ret
+        _.extend x[2], resistance: ret
+      x[2]
+  concat first, curr
+      
 # provide entryExit according to input support or resistance levels array
 levels = ({arr, plRatio}) -> (obs) ->
   plRatio ?= [0.01, 0.005]
@@ -344,6 +376,10 @@ insideBar = -> (obs) ->
   concat first, next
 
 export default {
+  find: {
+    support
+    resistance
+  }
   levels
   meanReversion
   meanField
