@@ -12,7 +12,6 @@ level = -> (obs) ->
     .pipe take 2
   curr = obs
     .pipe bufferCount 5, 1
-    .pipe skipLast 2
     .pipe map (x) ->
       support = x[0].low > x[1].low and 
         x[1].low > x[2].low and 
