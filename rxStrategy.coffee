@@ -7,35 +7,25 @@ EventEmitter = require 'events'
 {ohlc} = require('./analysis').default
 import {skipLast, take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
 
-support = (field='low') -> (obs) ->
+level = -> (obs) ->
   first = obs
     .pipe take 2
   curr = obs
     .pipe bufferCount 5, 1
     .pipe skipLast 2
     .pipe map (x) ->
-      ret = x[0][field] > x[1][field] and 
-        x[1][field] > x[2][field] and 
-        x[2][field] < x[3][field] and 
-        x[3][field] < x[4][field]
-      if ret
-        _.extend x[2], support: ret
-      x[2]
-  concat first, curr
-      
-resistance = (field='high') -> (obs) ->
-  first = obs
-    .pipe take 2
-  curr = obs
-    .pipe bufferCount 5, 1
-    .pipe skipLast 2
-    .pipe map (x) ->
-      ret = x[0][field] < x[1][field] and
-        x[1][field] < x[2][field] and
-        x[2][field] > x[3][field] and
-        x[3][field] > x[4][field]
-      if ret
-        _.extend x[2], resistance: ret
+      support = x[0].low > x[1].low and 
+        x[1].low > x[2].low and 
+        x[2].low < x[3].low and 
+        x[3].low < x[4].low
+      resistance = x[0].high < x[1].high and
+        x[1].high < x[2].high and
+        x[2].high > x[3].high and
+        x[3].high > x[4].high
+      if support
+        _.extend x[2], {support}
+      if resistance
+        _.extend x[2], {resistance}
       x[2]
   concat first, curr
       
@@ -377,8 +367,7 @@ insideBar = -> (obs) ->
 
 export default {
   find: {
-    support
-    resistance
+    level
   }
   levels
   meanReversion
