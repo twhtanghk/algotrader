@@ -7,7 +7,11 @@ EventEmitter = require 'events'
 {ohlc} = require('./analysis').default
 import {skipLast, take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
 
-level = -> (obs) ->
+find = {}
+
+# obs: cooked ohlc with duplicate timestamp removed
+# delay: 2 entries
+find.level = -> (obs) ->
   first = obs
     .pipe take 2
   curr = obs
@@ -28,6 +32,33 @@ level = -> (obs) ->
       x[2]
   concat first, curr
       
+# obs: cooked ohlc with duplicate timestamp removed
+# delay: 0
+find.box = (size=20) -> (obs) ->
+  first = obs
+    .pipe take size - 1
+  curr = obs
+    .pipe bufferCount size, 1
+    .pipe map (i) ->
+      [..., last] = i
+      _.extend last, box: [
+        _.minBy(i, 'low').low
+        _.maxBy(i, 'high').high
+      ]
+  concat first, curr
+    
+# obs: cooked ohlc with duplicate timestamp removed
+# delay: 0
+find.volUp = (size=20) -> (obs) ->
+  first = obs
+    .pipe take size - 1
+  curr = obs
+    .pipe bufferCount size, 1
+    .pipe map (i) ->
+      [..., last] = i
+      _.extend last, (_.pick (meanVol i), ['volume.mean', 'volume.stdev', 'volume.trend'])
+  concat first, curr
+
 # provide entryExit according to input support or resistance levels array
 levels = ({arr, plRatio}) -> (obs) ->
   plRatio ?= [0.01, 0.005]
@@ -365,9 +396,7 @@ insideBar = -> (obs) ->
   concat first, next
 
 export default {
-  find: {
-    level
-  }
+  find
   levels
   meanReversion
   meanField
