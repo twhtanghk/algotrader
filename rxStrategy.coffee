@@ -9,6 +9,16 @@ import {skipLast, take, tap, zip, bufferCount, concat, filter, toArray, map, tak
 
 find = {}
 
+entry = ({i, id, side, price}) ->
+  i.entry ?= []
+  i.entry.push {id, side, price}
+  i
+
+exit = ({i, id, side, price}) ->
+  i.exit ?= []
+  i.exit.push {id, side, price}
+  i
+
 # obs: cooked ohlc with duplicate timestamp removed
 # delay: 2 entries
 find.level = -> (obs) ->
@@ -26,9 +36,17 @@ find.level = -> (obs) ->
         x[2].high > x[3].high and
         x[3].high > x[4].high
       if support
-        _.extend x[2], {support}
+        x[2] = entry 
+          i: x[2]
+          id: 'level.support'
+          side: 'buy'
+          price: x[2].low
       if resistance
-        _.extend x[2], {resistance}
+        x[2] = exit 
+          i: x[2]
+          id: 'level.resistance'
+          side: 'sell'
+          price: x[2].high
       x[2]
   concat first, curr
       
@@ -41,10 +59,10 @@ find.box = (size=20) -> (obs) ->
     .pipe bufferCount size, 1
     .pipe map (i) ->
       [..., last] = i
-      _.extend last, box: [
-        _.minBy(i, 'low').low
-        _.maxBy(i, 'high').high
-      ]
+      low = _.minBy(i, 'low').low
+      high =  _.maxBy(i, 'high').high
+      box = [ low, high, (high - low) * 100 / last.close ]
+      _.extend last, {box}
   concat first, curr
     
 # obs: cooked ohlc with duplicate timestamp removed
