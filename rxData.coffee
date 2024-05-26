@@ -80,7 +80,6 @@ class Order extends Subject
     {@id, @code, @name, @side, @type, @status, @price, @qty, @timeInForce, @createTime, @updateTime}
 
 class Account extends Subject
-  orderList: []
   position: ->
     throw new Error 'calling Account virtual method position'
   historyOrder: ({beginTime, endTime}) ->
@@ -88,11 +87,7 @@ class Account extends Subject
   streamOrder: ->
     throw new Error 'calling Account virtual method streamOrder'
   placeOrder: (order) ->
-    length = @orderList.push new Order _.extend order, id: @orderList.length
-    @next type: 'orderAdd', data: @orderList[length - 1]
-    length - 1
-  enableOrder: (index) ->
-    @orderList[index].enable = true 
+    throw new Error 'calling Account virtual method streamOrder'
   cancelOrder: (order) ->
     throw new Error 'calling Account virtual method cancelOrder'
   orders: ({beginTime}={}) ->
@@ -105,13 +100,36 @@ class Account extends Subject
       .pipe map (order) ->
         type: 'orderChg'
         data: order
-    queued = (from @orderList)
-      .pipe map (order) ->
-        type: 'orderList'
-        data: order
-    (merge history, brokerUpdate, queued, @)
+    (merge history, brokerUpdate, @)
       .pipe filter ({type}) ->
         type.match /order.*/
+
+class TestAccount extends Account
+  balance: null
+  code: null
+  orderList: []
+
+  constructor: (@balance = {ETH: 0, USDT: 100}) ->
+    super()
+
+  position: ->
+    @balance
+
+  historyOrder: ->
+    @orderList
+
+  placeOrder: (order) ->
+    {code, side, price, qty} = order
+    pair = for k, v of @balance
+      k
+    if code != pair[0] + pair[1]
+      throw new Error "invalid code #{code} #{pair}"
+    if side not in ['buy', 'sell']
+      throw new Error "invalid side #{side}"
+    qty = qty * (if side == 'buy' then 1 else -1)
+    @balance[pair[0]] = @balance[pair[0]] + qty
+    @balance[pair[1]] = @balance[pair[1]] - price * qty
+    @orderList.push _.extend order, id: @orderList.length
 
 class Broker extends Subject
   constructor: ->
@@ -128,6 +146,8 @@ class Broker extends Subject
     throw new Error 'calling Broker virtual method accounts'
   defaultAcc: ->
     (await @accounts())[0]
+  testAcc: (balance) ->
+    new TestAccount balance
   orderBook: ({market, code}) ->
     throw new Error 'calling Broker virtual method orderBook'
   quickQuote: ({market, code}) ->
