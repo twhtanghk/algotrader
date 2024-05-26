@@ -130,6 +130,7 @@ class TestAccount extends Account
     @balance[pair[0]] = @balance[pair[0]] + qty
     @balance[pair[1]] = @balance[pair[1]] - price * qty
     @orderList.push _.extend order, id: @orderList.length
+    order
 
 class Broker extends Subject
   constructor: ->
