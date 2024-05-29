@@ -109,8 +109,9 @@ class TestAccount extends Account
   code: null
   orderList: []
 
-  constructor: (@balance = {ETH: 0, USDT: 100}) ->
+  constructor: ({balance}) ->
     super()
+    @balance = balance
 
   position: ->
     @balance
