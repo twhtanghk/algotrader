@@ -5,7 +5,7 @@ stats = require 'stats-lite'
 EventEmitter = require 'events'
 {constituent, history, data} = require('./rxData').default
 {ohlc} = require('./analysis').default
-import {skipLast, take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
+import {take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
 
 find = {}
 
@@ -57,6 +57,8 @@ find.box = (size=20) -> (obs) ->
     .pipe take size - 1
   curr = obs
     .pipe bufferCount size, 1
+    .pipe filter (x) ->
+      x.length == size
     .pipe map (i) ->
       [..., last] = i
       low = _.minBy(i, 'low').low
@@ -72,6 +74,8 @@ find.volUp = (size=20) -> (obs) ->
     .pipe take size - 1
   curr = obs
     .pipe bufferCount size, 1
+    .pipe filter (x) ->
+      x.length == size
     .pipe map (i) ->
       [..., last] = i
       _.extend last, (_.pick (meanVol i), ['volume.mean', 'volume.stdev', 'volume.trend'])

@@ -90,6 +90,14 @@ class Account extends Subject
     throw new Error 'calling Account virtual method streamOrder'
   cancelOrder: (order) ->
     throw new Error 'calling Account virtual method cancelOrder'
+  fundAvailable: (order) ->
+    {code, pair, side, qty, price} = order
+    pos = await @position()
+    bal = [
+      pos[pair[0]] || 0
+      pos[pair[1]] || 0
+    ]
+    (side == 'buy' and bal[1] > qty * price) or (side == 'sell' and bal[0] > qty)
   orders: ({beginTime}={}) ->
     history = (await @historyOrder {beginTime})
       .pipe map (order) ->
@@ -108,10 +116,33 @@ class TestAccount extends Account
   balance: null
   code: null
   orderList: []
+  ocoList: []
+  stream:
+    order: new Subject()
+    oco: new Subject()
+    position: new Subject()
 
   constructor: ({balance}) ->
     super()
     @balance = balance
+
+  next: (ohlc) ->
+    super()
+    {open, high, low, high} = ohlc
+    @ocoList
+      .map ({id, code, pair, side, qty, below, above, status}, i) =>
+        if status != 'FILLED'
+          bal = @position()
+          if low <= below.price and below.price <= high
+            console.log "oco #{i} filled"
+            # check position
+            ret = @placeOrder {code, pair, side, qty, price: below.price, ocoId: i}
+            _.extend @ocoList[i], ret
+          if low <= above.price and above.price <= high
+            console.log "oco #{i} filled"
+            # check position
+            ret = @placeOrder {code, pair, side, qty, price: above.price, ocoId: i}
+            _.extend @ocoList[i], ret
 
   position: ->
     @balance
@@ -120,9 +151,9 @@ class TestAccount extends Account
     @orderList
 
   placeOrder: (order) ->
-    {code, side, price, qty} = order
-    pair = for k, v of @balance
-      k
+    {code, pair, side, price, qty} = order
+    if not await @fundAvailable order
+      throw new Error "fund not available for order #{side} #{qty} at #{price}"
     if code != pair[0] + pair[1]
       throw new Error "invalid code #{code} #{pair}"
     if side not in ['buy', 'sell']
@@ -130,12 +161,19 @@ class TestAccount extends Account
     qty = qty * (if side == 'buy' then 1 else -1)
     @balance[pair[0]] = @balance[pair[0]] + qty
     @balance[pair[1]] = @balance[pair[1]] - price * qty
-    @orderList.push _.extend order, id: @orderList.length
+    @orderList.push _.extend order, {id: @orderList.length, status: 'FILLED'}
+    @stream.order.next order
+    @stream.position.next @position()
+    order
+
+  placeOCO: (order) ->
+    @ocoList.push _.extend order, id: @ocoList.length
+    @stream.oco.next order
     order
 
 class Broker extends Subject
   constructor: ->
-    super() 
+    super()
   historyKL: ({market, code, start, end, freq} = {}) ->
     throw new Error 'calling Broker virtual method historyKL'
   streamKL: ({market, code, freq} = {}) ->
