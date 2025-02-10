@@ -1,6 +1,6 @@
 _ = require 'lodash'
-import {Subject, take, from, merge, concat, filter, tap, map} from 'rxjs'
-import moment from 'moment'
+{Subject, take, from, merge, concat, filter, tap, map} = require 'rxjs'
+moment = require 'moment'
 {ohlc} = require './analysis'
 
 ###
@@ -202,7 +202,7 @@ class Broker extends Subject
               sell: ask[0].price
           error: reject
 
-export default {
+module.exports = {
   Order
   Account
   Broker

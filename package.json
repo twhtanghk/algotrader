@@ -1,11 +1,10 @@
 {
-  "type": "module",
   "name": "algotrader",
   "version": "0.0.1",
   "description": "",
   "main": "index.coffee",
   "scripts": {
-    "test": "node -r coffeescript/register -r esm  test/data.coffee"
+    "test": "coffee test/data.coffee"
   },
   "repository": {
     "type": "git",

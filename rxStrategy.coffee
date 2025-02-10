@@ -5,7 +5,7 @@ stats = require 'stats-lite'
 EventEmitter = require 'events'
 {constituent, history, data} = require('./rxData').default
 {ohlc} = require('./analysis').default
-import {take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
+{take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} = require 'rxjs'
 
 find = {}
 
@@ -417,7 +417,7 @@ insideBar = -> (obs) ->
       b
   concat first, next
 
-export default {
+module.exports = {
   find
   levels
   meanReversion

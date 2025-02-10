@@ -1,4 +1,4 @@
-import {bufferCount, filter, scan, zip, map} from 'rxjs'
+{bufferCount, filter, scan, zip, map} = require 'rxjs'
 
 # input time ascending order of ohlc data
 # i.e. [
@@ -75,7 +75,7 @@ skipDup = (field='time') -> (obs) ->
     .pipe map ([prev, curr]) ->
       prev
     
-export default
+module.exports =
   ohlc: {
     isSupport
     isResistance
