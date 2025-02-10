@@ -3,8 +3,8 @@ Promise = require 'bluebird'
 moment = require 'moment'
 stats = require 'stats-lite'
 EventEmitter = require 'events'
-{constituent, history, data} = require('./rxData').default
-{ohlc} = require('./analysis').default
+{constituent, history, data} = require './rxData'
+{ohlc} = require './analysis'
 {take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} = require 'rxjs'
 
 find = {}
