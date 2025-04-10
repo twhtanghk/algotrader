@@ -2,7 +2,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import Promise from 'bluebird'
 import {Subject, from, filter, map, tap} from 'rxjs'
-import {freq, Broker} from './broker.js'
+import {freqDuration, Broker} from './broker.js'
 import {Order} from './order.js'
 import ftWebsocket from 'futu-api'
 import { ftCmdID } from 'futu-api'
@@ -172,13 +172,14 @@ class Account
           trdMarket: @market[0]
     (Futu.errHandler await @broker.ws.GetPositionList req).positionList
 
-  orders: ->
+  orders: (statusList=[Futu.constant.OrderStatus.OrderStatus_Submitted]) ->
     req =
       c2s:
         header:
           trdEnv: @trdEnv
           accID: @id
           trdMarket: @market[0]
+        filterStatusList: statusList
     (Futu.errHandler await @broker.ws.GetOrderList req).orderList
 
   cash: (opts={currency: 1}) ->
@@ -226,23 +227,37 @@ class Futu extends Broker
     '1y': KLType.KLType_Year
 
   @constant: {
-    Common
     KLType
     ModifyOrderOp
     OrderStatus
     OrderType
-    Qot_Common
     QotMarket
     RehabType
     RetType
     SecurityFirm
     SubType
     TradeDateMarket
-    Trd_Common
     TrdEnv
     TrdMarket
     TrdSide
     TrdSecMarket
+  }
+
+  @invert = {
+    KLType: _.invert Futu.constant.KLType
+    ModifyOrderOp: _.invert Futu.constant.ModifyOrderOp
+    OrderStatus: _.invert Futu.constant.OrderStatus
+    OrderType: _.invert Futu.constant.OrderType
+    QotMarket: _.invert Futu.constant.QotMarket
+    RehabType: _.invert Futu.constant.RehabType
+    RetType: _.invert Futu.constant.RetType
+    SecurityFirm: _.invert Futu.constant.SecurityFirm
+    SubType: _.invert Futu.constant.SubType
+    TradeDateMarket: _.invert Futu.constant.TradeDateMarket
+    TrdEnv: _.invert Futu.constant.TrdEnv
+    TrdMarket: _.invert Futu.constant.TrdMarket
+    TrdSide: _.invert Futu.constant.TrdSide
+    TrdSecMarket: _.invert Futu.constant.TrdSecMarket
   }
 
   @optCode: (code) ->

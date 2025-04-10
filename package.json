@@ -6,6 +6,7 @@
   "main": "index.coffee",
   "scripts": {
     "build": "coffee -c broker.coffee order.coffee futu.coffee test/1-futu.test.coffee",
+    "clean": "rm *.js test/*.js",
     "test": "vitest"
   },
   "repository": {

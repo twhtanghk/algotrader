@@ -1,7 +1,7 @@
 import {Subject, concat} from 'rxjs'
 
 # key: [actual duration, duration of data to be fetched]
-freq =
+freqDuration =
   '1': 
     duration: minute: 1
     dataFetched: week: 1
@@ -55,5 +55,5 @@ class Broker extends Subject
   placeOrder: (opts) ->
     throw new Error 'calling Broker virtual method order'
 
-export default {freq, Broker}
-export {freq, Broker}
+export default {freqDuration, Broker}
+export {freqDuration, Broker}
