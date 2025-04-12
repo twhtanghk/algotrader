@@ -265,12 +265,12 @@ class Futu extends Broker
 
   constructor: ({host, port} = {}) ->
     super()
-    host ?= 'futu'
+    host ?= process.env.WSHOST || 'futu'
     port ?= 33333
     return do =>
       await new Promise (resolve, reject) =>
         @ws = new ftWebsocket()
-        @ws.start host, port, true, '123456'
+        @ws.start host, port, false, null
         @ws.onlogin = resolve
         @ws.onPush = (cmd, data) =>
           try
