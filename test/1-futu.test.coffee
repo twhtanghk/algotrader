@@ -1,30 +1,44 @@
+import _ from 'lodash'
 import {describe, test} from 'vitest'
 import {Futu} from '../futu.js'
 import {inject} from 'ssl-root-cas'
+import {concat} from 'rxjs'
 
 describe 'futu', ->
   inject()
   futu = await new Futu()
   accounts = await futu.accounts()
+  acc = await accounts[0]
 
   test 'constant', ->
     console.log Futu.constant
     console.log Futu.invert
 
   test 'cash', ->
-    ret = await accounts[0].cash()
-    {power, totalAssets, cash, marketVal} = ret
-    console.log {power, totalAssets, cash, marketVal}
+    console.log _.pick await acc.cash(), [
+      'power'
+      'totalAssets'
+      'cash'
+      'marketVal'
+    ]
 
   test 'position', ->
-    ret = await accounts[0].position()
+    ret = await (await accounts[0]).position()
     console.log ret.map (stock) ->
-      {code, name, qty, canSellQty, price, costPrice, val, plVal, plRatio} = stock
-      {code, name, qty, canSellQty, price, costPrice, val, plVal, plRatio}
+      _.pick stock, [
+        'code'
+        'name'
+        'qty'
+        'canSellQty'
+        'price' 
+        'costPrice'
+        'val'
+        'plVal'
+        'plRatio'
+      ]
 
   test 'orders', ->
-    ret = await accounts[0].orders()
-    console.log ret
+    acc.subscribe console.log
 
   test 'datafeed', ->
     (await futu.dataKL {market: 'hk', code: '01211'})

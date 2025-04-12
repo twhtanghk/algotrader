@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import moment from 'moment'
 import Promise from 'bluebird'
-import {Subject, from, filter, map, tap} from 'rxjs'
+import {ReplaySubject, concat, from, filter, map, tap} from 'rxjs'
 import {freqDuration, Broker} from './broker.js'
 import {Order} from './order.js'
 import ftWebsocket from 'futu-api'
@@ -57,9 +57,9 @@ class FutuOrder extends Order
       id: orderID.toNumber()
       code: code
       name: name
-      side: trdSide
-      type: orderType
-      status: orderStatus
+      side: Futu.invert.TrdSide[trdSide]
+      type: Futu.invert.OrderType[orderType]
+      status: Futu.invert.OrderStatus[orderStatus]
       price: price
       qty: qty
       fillQty: fillQty
@@ -70,10 +70,11 @@ class FutuOrder extends Order
   toJSON: ->
     _.extend super(), {@fillQty, @fillAvgPrice}
       
-class Account
+class Account extends ReplaySubject
   serialNo: 0
 
   constructor: (opts) ->
+    super()
     {broker, trdEnv, accID, trdMarketAuthList, accType, cardNum, securityFirm} = opts
     @broker = broker
     @id = accID
@@ -82,9 +83,14 @@ class Account
     @type = accType
     @cardNum = cardNum
     @securityFirm = securityFirm
+    return do =>
+      (concat await @historyOrder(), await @streamOrder())
+        .subscribe (x) =>
+          @next x
+      return @
 
   historyOrder: ({beginTime, endTime}={}) ->
-    beginTime ?= moment().subtract week: 1
+    beginTime ?= moment().subtract day: 3
     endTime ?= moment()
     req =
       c2s:
@@ -100,7 +106,7 @@ class Account
     from (openOrder.orderList
       .concat history.orderList
       .map (order) ->
-        (Order.fromFutu order).toJSON()
+        (FutuOrder.fromFutu order).toJSON()
     )
 
   streamOrder: ->
@@ -110,9 +116,9 @@ class Account
     await @broker.ws.SubAccPush req
     @broker
       .pipe filter ({type, data}) ->
-        type == 'Trd_UpdateOrder'
+        type in ['Trd_UpdateOrder', 'Trd_UpdateOrderFill']
       .pipe map ({type, data}) ->
-        (Order.fromFutu data.order).toJSON()
+        (FutuOrder.fromFutu data.order).toJSON()
 
   placeOrder: (order) ->
     super order
@@ -171,16 +177,6 @@ class Account
           accID: @id
           trdMarket: @market[0]
     (Futu.errHandler await @broker.ws.GetPositionList req).positionList
-
-  orders: (statusList=[Futu.constant.OrderStatus.OrderStatus_Submitted]) ->
-    req =
-      c2s:
-        header:
-          trdEnv: @trdEnv
-          accID: @id
-          trdMarket: @market[0]
-        filterStatusList: statusList
-    (Futu.errHandler await @broker.ws.GetOrderList req).orderList
 
   cash: (opts={currency: 1}) ->
     {currency} = opts
@@ -458,7 +454,7 @@ class Futu extends Broker
         trdEnv == 1 and 1 in trdMarketAuthList
       .map (acc) =>
         acc.broker = @
-        new Account acc
+        await new Account acc
 
   unlock: ({pwdMD5}) ->
     req =

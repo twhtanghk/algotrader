@@ -1,4 +1,6 @@
-import {Subject, concat} from 'rxjs'
+import _ from 'lodash'
+import moment from 'moment'
+import {Subject, concat, map} from 'rxjs'
 
 # key: [actual duration, duration of data to be fetched]
 freqDuration =
@@ -51,6 +53,8 @@ class Broker extends Subject
     freq ?= '1'
     opts = {market, code, start, freq}
     concat (await @historyKL opts), (await @streamKL opts)
+      .pipe map (x) ->
+        _.extend x, timestamp: moment.unix x.timestamp
   # return rx subject to emit every update of the created order
   placeOrder: (opts) ->
     throw new Error 'calling Broker virtual method order'
