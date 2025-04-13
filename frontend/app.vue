@@ -1,6 +1,7 @@
 <template>
   <div>
     <position :account='account' />
+    <order :account='account' />
   </div>
 </template>
 

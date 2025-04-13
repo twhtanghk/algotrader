@@ -9,5 +9,10 @@ export default defineNuxtConfig({
   },
   experimental: {
     clientNodeCompat: true
+  },
+  vite: {
+    define: {
+      "process.env.WSHOST": JSON.stringify(process.env.WSHOST)
+    }
   }
 })
