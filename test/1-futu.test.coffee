@@ -43,3 +43,6 @@ describe 'futu', ->
   test 'datafeed', ->
     (await futu.dataKL {market: 'hk', code: '01211'})
       .subscribe console.log
+
+  test 'quote', ->
+    console.log await futu.quote {market: 'hk', code: 'ANA250429C85000'}

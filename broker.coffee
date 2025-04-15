@@ -55,9 +55,8 @@ class Broker extends Subject
     concat (await @historyKL opts), (await @streamKL opts)
       .pipe map (x) ->
         _.extend x, timestamp: moment.unix x.timestamp
-  # return rx subject to emit every update of the created order
-  placeOrder: (opts) ->
-    throw new Error 'calling Broker virtual method order'
+  quote: ({market, code}) ->
+    throw new Error 'calling Broker virtual method quote'
 
 export default {freqDuration, Broker}
 export {freqDuration, Broker}

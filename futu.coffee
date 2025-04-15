@@ -416,6 +416,9 @@ class Futu extends Broker
         [min, max] = strikeRange
         min <= strikePrice and strikePrice <= max
 
+  quote: ({market, code}) ->
+    await @basicQuote {market, code}
+
   basicQuote: ({market, code}) ->
     market ?= 'hk'
     market = Futu.marketMap[market]
