@@ -75,7 +75,7 @@ skipDup = (field='time') -> (obs) ->
     .pipe map ([prev, curr]) ->
       prev
     
-module.exports =
+export default
   ohlc: {
     isSupport
     isResistance

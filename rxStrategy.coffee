@@ -1,11 +1,11 @@
-_ = require 'lodash'
-Promise = require 'bluebird'
-moment = require 'moment'
-stats = require 'stats-lite'
-EventEmitter = require 'events'
-{constituent, history, data} = require './rxData'
-{ohlc} = require './analysis'
-{take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} = require 'rxjs'
+import _ from 'lodash'
+import * as Promise from 'bluebird'
+import moment from 'moment'
+import stats from 'stats-lite'
+import {EventEmitter} from 'events'
+import {constituent, history, data} from './rxData'
+import {ohlc} from './analysis'
+import {take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
 
 find = {}
 
@@ -417,7 +417,7 @@ insideBar = -> (obs) ->
       b
   concat first, next
 
-module.exports = {
+export default {
   find
   levels
   meanReversion

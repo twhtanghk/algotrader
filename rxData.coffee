@@ -1,7 +1,7 @@
-_ = require 'lodash'
-{Subject, take, from, merge, concat, filter, tap, map} = require 'rxjs'
-moment = require 'moment'
-{ohlc} = require './analysis'
+import _ from 'lodash'
+import {Subject, take, from, merge, concat, filter, tap, map} from 'rxjs'
+import moment from 'moment'
+import {ohlc} from './analysis'
 
 ###
 # get constituents stock of specified index

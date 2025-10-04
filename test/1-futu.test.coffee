@@ -45,4 +45,4 @@ describe 'futu', ->
       .subscribe console.log
 
   test 'quote', ->
-    console.log await futu.quote {market: 'hk', code: 'ANA250429C85000'}
+    console.log await futu.quote {market: 'hk', code: '00700'}
