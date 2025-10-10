@@ -6,11 +6,11 @@ import {freqDuration, Broker} from './broker.js'
 import {Order} from './order.js'
 import ftWebsocket from 'futu-api'
 import { ftCmdID } from 'futu-api'
-import { Common, Qot_Common, Trd_Common } from 'futu-api/proto.js'
+import futuApi from 'futu-api/proto.js'
 
-{TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
-{RetType} = Common
-{ModifyOrderOp, OrderType, OrderStatus, SecurityFirm, TrdEnv, TrdMarket, TrdSecMarket, TrdSide, TimeInForce, TrdCategory} = Trd_Common
+{TradeDateMarket, SubType, RehabType, KLType, QotMarket} = futuApi.Qot_Common
+{RetType} = futuApi.Common
+{ModifyOrderOp, OrderType, OrderStatus, SecurityFirm, TrdEnv, TrdMarket, TrdSecMarket, TrdSide, TimeInForce, TrdCategory} = futuApi.Trd_Common
 
 class FutuOrder extends Order
   @SIDE:
@@ -192,7 +192,7 @@ class Account extends ReplaySubject
 class Futu extends Broker
   @marketMap:
     'hk': QotMarket.QotMarket_HK_Security
-    'us': QotMarket.QotMarket_US_Securityx
+    'us': QotMarket.QotMarket_US_Security
 
   @subTypeMap:
     'Basic': SubType.SubType_Basic

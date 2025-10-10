@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.coffee",
   "scripts": {
-    "build": "coffee -c broker.coffee order.coffee futu.coffee test/1-futu.test.coffee",
+    "build": "coffee -c analysis.coffee broker.coffee order.coffee futu.coffee test/1-futu.test.coffee",
     "clean": "rm *.js test/*.js",
     "test": "vitest"
   },
@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/twhtanghk/algotrader#readme",
   "dependencies": {
-    "algotrader": "github:twhtanghk/algotrader",
     "bluebird": "^3.7.2",
     "coffeescript": "^2.7.0",
     "esm": "^3.2.25",
