@@ -17,6 +17,30 @@ export default defineNitroPlugin(async (app) => {
     socket.on('position', async (msg) => {
       socket.emit('position', await acc.position())
     })
+    socket.on('subscribe', async (msg) => {
+      const {action, code, freq} = msg
+      switch(action) {
+        case 'quote':
+          (await app.broker.quote({code}))
+            .subscribe((data) => {
+              socket.emit('quote', data)
+            })
+          socket.emit('basic', await broker.securitySnapshot({code}))
+	  break
+	case 'orderBook':
+	  (await app.broker.streamOrder())
+	    .subscribe((data) => {
+              socket.emit('orderBook', data)
+            })
+	  break
+	case 'candlestick':
+	  (await app.broker.streamKL({code, freq}))
+	    .subscribe((data) => {
+              socket.emit('candlestick', data)
+            })
+	  break
+      }
+    })
   })
   app.router.use('/socket.io/', defineEventHandler({
     handler(event) {

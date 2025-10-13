@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import {Promise} from 'bluebird'
 import {describe, test} from 'vitest'
 import {Futu} from '../futu.js'
 import {inject} from 'ssl-root-cas'
@@ -44,5 +45,29 @@ describe 'futu', ->
     (await futu.dataKL {market: 'hk', code: '01211'})
       .subscribe console.log
 
-  test 'quote', ->
-    console.log await futu.quote {market: 'hk', code: '00700'}
+  test 'quote 1', ->
+    futu
+      .subscribe console.log
+    await futu.quote {market: 'hk', code: '00700'}
+
+  test 'subInfo 1', ->
+    console.log JSON.stringify (await futu.subInfo()), null, 2
+
+  test 'quote 2', ->
+    futu
+      .subscribe console.log
+    await futu.quote {market: 'hk', code: '00005'}
+
+  test 'subInfo 2', ->
+    console.log JSON.stringify (await futu.subInfo()), null, 2
+###
+  test 'unsubAll', ->
+    await Promise.delay 60000
+    console.log JSON.stringify (await futu.unsubAll()), null, 2
+###
+  test 'subInfo 3', ->
+    console.log JSON.stringify (await futu.subInfo()), null, 2
+
+  test 'securitySnapshot', ->
+    console.log JSON.stringify (await futu.securitySnapshot code: '00700'), null, 2
+    console.log JSON.stringify (await futu.securitySnapshot code: 'LEN251030P12000'), null, 2

@@ -25,5 +25,9 @@ export default defineNuxtConfig({
       "stream.PassThrough": "TransformStream"
     }
   },
-  ssr: false
+  ssr: false,
+  sourcemap: {
+    server: true,
+    client: true
+  }
 })

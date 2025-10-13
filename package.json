@@ -7,7 +7,7 @@
   "scripts": {
     "build": "coffee -c analysis.coffee broker.coffee order.coffee futu.coffee test/1-futu.test.coffee",
     "clean": "rm *.js test/*.js",
-    "test": "vitest"
+    "test": "vitest --testTimeout=80000"
   },
   "repository": {
     "type": "git",

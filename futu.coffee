@@ -287,6 +287,10 @@ class Futu extends Broker
     else
       s2c
 
+  subInfo: ->
+    (Futu.errHandler await @ws.GetSubInfo c2s: isReqAllConn: true)
+      .connSubInfoList
+    
   historyKL: ({market, code, start, end, freq}) ->
     security =
       market: Futu.marketMap[market]
@@ -367,6 +371,12 @@ class Futu extends Broker
       bid: data.orderBookBidList  
     @pipe orderBook, transform
 
+  unsubAll: ->
+    await @ws.Sub
+      c2s:
+        isSubOrUnSub: false
+        isUnsubAll: true
+
   unsubKL: ({market, code, freq}) ->
     opts = {market, code, freq}
     market ?= 'hk'
@@ -395,6 +405,26 @@ class Futu extends Broker
     (Futu.errHandler await @ws.GetMarketState 
       c2s: securityList: [{market, code}]).marketInfoList
 
+  securitySnapshot: ({market, code}) ->
+    market ?= 'hk'
+    opts =
+      c2s:
+        securityList: [
+          {market: Futu.marketMap[market], code}
+        ]
+    [ret, ...] = (Futu.errHandler await @ws.GetSecuritySnapshot opts)
+      .snapshotList
+    val = 
+      code: ret.basic.security.code
+      name: ret.basic.name
+      type: ret.basic.type
+      isSuspend: ret.basic.isSuspend
+      data: ret.equityExData
+    if val.type == 8
+      val.data = ret.optionExData
+      val.owner = (await @securitySnapshot code: val.data.owner.code).data
+    val
+
   optionChain: ({market, code, strikeRange, beginTime, endTime}) ->
     market ?= 'hk'
     beginTime ?= moment()
@@ -417,20 +447,38 @@ class Futu extends Broker
         min <= strikePrice and strikePrice <= max
 
   quote: ({market, code}) ->
+    market ?= 'hk'
     await @basicQuote {market, code}
+    chkQuote = filter ({type, data}) ->
+      type == 'Qot_UpdateBasicQot'
+    chkMarket = filter ({type, data}) ->
+      {security} = data.basicQotList[0]
+      Futu.marketMap[market] == security.market
+    transform = map ({type, data}) ->
+      {security, updateTime, openPrice, highPrice, lowPrice, curPrice, volume, turnover} = data.basicQotList[0]
+      market: security.market
+      code: security.code
+      timestamp: updateTime
+      open: openPrice
+      high: highPrice
+      low: lowPrice
+      close: curPrice
+      volume: volume
+      turnover: turnover
+    @pipe chkQuote, chkMarket, transform
 
   basicQuote: ({market, code}) ->
     market ?= 'hk'
-    market = Futu.marketMap[market]
+    m = Futu.marketMap[market]
     await @ws.Sub
       c2s:
-        securityList: [{market, code}]
+        securityList: [{market: m, code}]
         subTypeList: [Futu.constant.SubType.SubType_Basic]
         isSubOrUnSub: true
         isRegOrUnRegPush: true
     req =
       c2s:
-        securityList: [{market, code}]
+        securityList: [{market: m, code}]
     [ret, ...] = (Futu.errHandler await @ws.GetBasicQot req).basicQotList
     ret
 
