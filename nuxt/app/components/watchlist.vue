@@ -1,6 +1,6 @@
 <template>
 <div>
-  <UInput v-model='name' @keyup.enter='update'/>
+  <USelect v-model='name' :items='watchlist' @change='update'/>
   <UTable sticky :data='items' :columns='columns' :sorting='sort'>
     <template #open-cell='{row}'>
       {{row.original.open?.toFixed(2)}}
@@ -30,9 +30,11 @@ import {reactive, ref} from 'vue'
 import {socket} from './socket'
 import {h, resolveComponent} from 'vue'
 
+const config = useRuntimeConfig()
 const UButton = resolveComponent('UButton')
 const items = reactive([])
-const name = ref('')
+const watchlist = config.public.watchlist.split(',')
+const name = ref(watchlist[0])
 const columns = [
   {accessorKey: 'code', header: ({column}) => colHead(UButton, column, {label: 'Code'})},
   {accessorKey: 'name', header: ({column}) => colHead(UButton, column, {label: 'Name'})},
@@ -62,6 +64,9 @@ const update = () => {
 }
 
 socket
+  .on('connect', () => {
+    update()
+  })
   .on('watchlist', (msg) => {
     for (const stock of msg) {
       items.unshift(stock)

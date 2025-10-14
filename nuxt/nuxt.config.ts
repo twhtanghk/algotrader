@@ -27,6 +27,9 @@ export default defineNuxtConfig({
       "stream.PassThrough": "TransformStream"
     }
   },
+  runtimeConfig: {
+    public: { watchlist: process.env.watchlist }
+  },
   ssr: false,
   sourcemap: {
     server: true,
