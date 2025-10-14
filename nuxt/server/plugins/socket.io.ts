@@ -9,38 +9,36 @@ export default defineNitroPlugin(async (app) => {
   const broker = await new Futu()
   const accounts = await broker.accounts()
   const acc = await accounts[0]
+  const quoteBasic = async (socket, code) => {
+    (await app.broker.quote({code}))
+      .subscribe((data) => {
+        socket.emit('quote', data)
+      })
+    socket.emit('basic', await broker.securitySnapshot({code}))
+  }
 
   app.broker = await new Futu()
   io.bind(engine)
+  /*
+   * position: futu position, quote, basic
+   * watchlist: quote, basic
+   */
   io.on('connection', (socket) => {
     console.log('connected')
-    socket.on('position', async (msg) => {
-      socket.emit('position', await acc.position())
-    })
-    socket.on('subscribe', async (msg) => {
-      const {action, code, freq} = msg
-      switch(action) {
-        case 'quote':
-          (await app.broker.quote({code}))
-            .subscribe((data) => {
-              socket.emit('quote', data)
-            })
-          socket.emit('basic', await broker.securitySnapshot({code}))
-	  break
-	case 'orderBook':
-	  (await app.broker.streamOrder())
-	    .subscribe((data) => {
-              socket.emit('orderBook', data)
-            })
-	  break
-	case 'candlestick':
-	  (await app.broker.streamKL({code, freq}))
-	    .subscribe((data) => {
-              socket.emit('candlestick', data)
-            })
-	  break
-      }
-    })
+    socket
+      .on('position', async (msg) => {
+        const ret = await acc.position()
+        socket.emit('position', ret)
+        for (const {code} of ret)
+          quoteBasic(socket, code)
+      })
+      .on('watchlist', async (msg) => {
+        const {name} = msg
+        if (process.env[name]) {
+          for (const code of process.env[name].split(','))
+            quoteBasic(socket, code)
+	}
+      })
   })
   app.router.use('/socket.io/', defineEventHandler({
     handler(event) {

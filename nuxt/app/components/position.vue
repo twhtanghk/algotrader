@@ -12,10 +12,10 @@
       {{row.original.price.toFixed(2)}}
     </template>
     <template #pe-cell='{row}'>
-      {{row.original.pe.toFixed(2)}}
+      {{row.original.pe?.toFixed(2)}}
     </template>
     <template #pb-cell='{row}'>
-      {{row.original.pb.toFixed(2)}}
+      {{row.original.pb?.toFixed(2)}}
     </template>
     <template #val-cell='{row}'>
       {{row.original.val.toLocaleString()}}
@@ -90,10 +90,12 @@ const plRatio = ({costPrice, price}) => {
 }
 
 socket
+  .on('connect', () => {
+    socket.emit('position')
+  })
   .on('position', (msg) => {
     for (const stock of msg) {
       items.unshift(stock)
-      socket.emit('subscribe', {action: 'quote', code: stock.code})
     }
   })
   .on('quote', (msg) => {
@@ -111,9 +113,6 @@ socket
       pe: ret.peRate,
       pb: ret.pbRate
     })
-  })
-  .on('connect', () => {
-    socket.emit('position')
   })
 </script>
 
