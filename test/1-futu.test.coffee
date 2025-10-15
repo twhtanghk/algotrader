@@ -4,6 +4,11 @@ import {describe, test} from 'vitest'
 import {Futu} from '../futu.js'
 import {inject} from 'ssl-root-cas'
 import {concat} from 'rxjs'
+import {default as root} from '../logger'
+
+logger = root.child 
+  namespace: 'futu.test'
+  targets: 'stderr%json'
 
 describe 'futu', ->
   inject()
@@ -47,7 +52,8 @@ describe 'futu', ->
 
   test 'quote 1', ->
     futu
-      .subscribe console.log
+      .subscribe (x) ->
+        logger.debug JSON.stringify x, null, 2
     await futu.quote {market: 'hk', code: '00700'}
 
   test 'subInfo 1', ->
@@ -55,7 +61,8 @@ describe 'futu', ->
 
   test 'quote 2', ->
     futu
-      .subscribe console.log
+      .subscribe (x) ->
+        console.log JSON.stringify x
     await futu.quote {market: 'hk', code: '00005'}
 
   test 'subInfo 2', ->

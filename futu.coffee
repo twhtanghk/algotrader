@@ -7,6 +7,9 @@ import {Order} from './order.js'
 import ftWebsocket from 'futu-api'
 import { ftCmdID } from 'futu-api'
 import futuApi from 'futu-api/proto.js'
+import {default as root} from './logger'
+
+logger = root.child namespace: 'futu'
 
 {TradeDateMarket, SubType, RehabType, KLType, QotMarket} = futuApi.Qot_Common
 {RetType} = futuApi.Common
@@ -453,7 +456,7 @@ class Futu extends Broker
       type == 'Qot_UpdateBasicQot'
     chkMarket = filter ({type, data}) ->
       {security} = data.basicQotList[0]
-      Futu.marketMap[market] == security.market
+      Futu.marketMap[market] == security.market and code == security.code
     transform = map ({type, data}) ->
       {security, updateTime, openPrice, highPrice, lowPrice, curPrice, volume, turnover} = data.basicQotList[0]
       market: security.market
