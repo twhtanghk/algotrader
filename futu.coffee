@@ -7,7 +7,7 @@ import {Order} from './order.js'
 import ftWebsocket from 'futu-api'
 import { ftCmdID } from 'futu-api'
 import futuApi from 'futu-api/proto.js'
-import {default as root} from './logger'
+import {default as root} from './logger.js'
 
 logger = root.child namespace: 'futu'
 

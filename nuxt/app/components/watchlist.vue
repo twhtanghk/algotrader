@@ -1,7 +1,12 @@
 <template>
 <div>
-  <USelect v-model='name' :items='watchlist' @change='update'/>
+  <USelect v-model='name' :items='list' @change='update'/>
   <UTable sticky :data='items' :columns='columns' :sorting='sort'>
+    <template #code-cell='{row}'>
+      <TVUrl :code='row.original.owner?.code || row.original.code'>
+        {{row.original.code}}
+      </TVUrl>
+    </template>
     <template #open-cell='{row}'>
       {{row.original.open?.toFixed(2)}}
     </template>
@@ -25,16 +30,16 @@
 </template>
 
 <script setup>
-import _ from 'lodash'
 import {reactive, ref} from 'vue'
-import {socket} from './socket'
+import {socket, watchlist, quote, basic} from './socket'
 import {h, resolveComponent} from 'vue'
 
 const config = useRuntimeConfig()
 const UButton = resolveComponent('UButton')
+const TVUrl= resolveComponent('tvurl')
 const items = reactive([])
-const watchlist = config.public.watchlist.split(',')
-const name = ref(watchlist[0])
+const list = config.public.watchlist.split(',')
+const name = ref(list[0])
 const columns = [
   {accessorKey: 'code', header: ({column}) => colHead(UButton, column, {label: 'Code'})},
   {accessorKey: 'name', header: ({column}) => colHead(UButton, column, {label: 'Name'})},
@@ -67,32 +72,9 @@ socket
   .on('connect', () => {
     update()
   })
-  .on('watchlist', (msg) => {
-    for (const stock of msg) {
-      items.unshift(stock)
-    }
-  })
-  .on('quote', (msg) => {
-    const {code, close} = msg
-    let found = _.find(items, {code})
-    if (found)
-      _.extend(found, msg)
-    else
-      items.unshift(msg)
-  })
-  .on('basic', (msg) => {
-    const {code, type, name, data, owner} = msg
-    let ret = _.pick(data, 'peRate', 'pbRate')
-    if (type == 8)
-      ret = _.pick(owner, 'peRate', 'pbRate')
-    _.extend(msg, {pe: ret.peRate, pb: ret.pbRate})
-    let found = _.find(items, {code})
-    if (found)
-      _.extend(found, msg)
-    else
-      items.unshift(msg)
-  })
-
+  .on('watchlist', watchlist(items))
+  .on('quote', quote(items))
+  .on('basic', basic(items))
 </script>
 
 <style>

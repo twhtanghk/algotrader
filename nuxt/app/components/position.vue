@@ -1,5 +1,10 @@
 <template>
   <UTable sticky :data='items' :columns='columns' :sorting='sort'>
+    <template #code-cell='{row}'>
+      <TVUrl :code='row.original.owner?.code || row.original.code'>
+        {{row.original.code}}
+      </TVUrl>
+    </template>
     <template #qty-cell='{row}'>
       <div :class="row.original.qty < 0 ? 'loss' : 'profit'">
         {{row.original.qty}}
@@ -37,13 +42,13 @@
 </template>
 
 <script setup>
-import _ from 'lodash'
 import {reactive} from 'vue'
 import {OrderCreate} from '#components'
-import {socket} from './socket'
+import {socket, position, quote, basic} from './socket'
 import {h, resolveComponent} from 'vue'
 
 const UButton = resolveComponent('UButton')
+const TVUrl= resolveComponent('tvurl')
 const overlay = useOverlay()
 const items = reactive([])
 const newOrder = reactive({
@@ -93,27 +98,9 @@ socket
   .on('connect', () => {
     socket.emit('position')
   })
-  .on('position', (msg) => {
-    for (const stock of msg) {
-      items.unshift(stock)
-    }
-  })
-  .on('quote', (msg) => {
-    const {code, close} = msg
-    _.extend(_.find(items, {code}), {
-      price: close
-    })
-  })
-  .on('basic', (msg) => {
-    const {code, type, data, owner} = msg
-    let ret = _.pick(data, 'peRate', 'pbRate')
-    if (type == 8)
-      ret = _.pick(owner, 'peRate', 'pbRate')
-    _.extend(_.find(items, {code}), {
-      pe: ret.peRate,
-      pb: ret.pbRate
-    })
-  })
+  .on('position', position(items))
+  .on('quote', quote(items))
+  .on('basic', basic(items))
 </script>
 
 <style>

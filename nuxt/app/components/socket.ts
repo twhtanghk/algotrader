@@ -1,3 +1,37 @@
+import _ from 'lodash'
 import {io} from 'socket.io-client'
 
 export const socket = io('', {transports: ['websocket']})
+
+export const position = (items) => { return (msg) => {
+  for (const stock of msg)
+    items.unshift(stock)
+}}
+
+export const watchlist = (items) => { return (msg) => {
+  for (const stock of msg)
+    items.unshift(stock)
+}}
+
+export const quote = (items) => { return (msg) => {
+  const {code, close} = msg
+  _.extend(_.find(items, {code}), {
+    price: close
+  })
+}}
+
+export const basic = (items) => { return (msg) => {
+  const {code, type, data, owner} = msg
+  let ret = _.pick(data, 'peRate', 'pbRate')
+  if (type == 8) {
+    ret = _.pick(owner, 'peRate', 'pbRate')
+    _.extend(owner, data.owner)
+  }
+  _.extend(msg, {pe: ret.peRate, pb: ret.pbRate})
+
+  const found = _.find(items, {code})
+  if (found)
+    _.extend(found, msg, {owner})
+  else
+    items.unshift(msg)
+}}
