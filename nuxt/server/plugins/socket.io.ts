@@ -1,4 +1,5 @@
 import {Futu} from 'algotrader/futu.js'
+import {delta} from 'algotrader/rxStrategy.js'
 import {Server as Engine} from 'engine.io'
 import {Server} from 'socket.io'
 import {defineEventHandler} from 'h3'
@@ -9,11 +10,18 @@ export default defineNitroPlugin(async (app) => {
   const broker = await new Futu()
   const accounts = await broker.accounts()
   const acc = await accounts[0]
-  const quoteBasic = async (socket, code) => {
+  const detail = async (socket, code) => {
+    // subscribe for quote update
     (await app.broker.quote({code}))
       .subscribe((data) => {
         socket.emit('quote', data)
+      });
+    // get delta
+    (await delta({code, broker: app.broker}))
+      .subscribe((data) => {
+        socket.emit('delta', data)
       })
+    // get basic data including pe, pb
     socket.emit('basic', await broker.securitySnapshot({code}))
   }
 
@@ -30,13 +38,13 @@ export default defineNitroPlugin(async (app) => {
         const ret = await acc.position()
         socket.emit('position', ret)
         for (const {code} of ret)
-          quoteBasic(socket, code)
+          detail(socket, code)
       })
       .on('watchlist', async (msg) => {
         const {name} = msg
         if (process.env[name]) {
           for (const code of process.env[name].split(','))
-            quoteBasic(socket, code)
+            detail(socket, code)
 	}
       })
   })

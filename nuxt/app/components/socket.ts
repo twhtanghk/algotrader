@@ -20,6 +20,18 @@ export const quote = (items) => { return (msg) => {
   })
 }}
 
+export const delta = (items) => { return (msg) => {
+  const {code, close, delta} = msg
+  const stdev = msg['close.stdev']
+  const mean = msg['close.mean']
+  const found = _.find(items, {code})
+  msg.delta = (close - mean) / stdev
+  if (found)
+    _.extend(found, _.pick(msg, 'delta'))
+  else
+    items.unshift(msg) 
+}}
+
 export const basic = (items) => { return (msg) => {
   const {code, type, data, owner} = msg
   let ret = _.pick(data, 'peRate', 'pbRate')

@@ -11,7 +11,7 @@ import {default as root} from './logger.js'
 
 logger = root.child namespace: 'futu'
 
-{TradeDateMarket, SubType, RehabType, KLType, QotMarket} = futuApi.Qot_Common
+{PlateSetType, TradeDateMarket, SubType, RehabType, KLType, QotMarket} = futuApi.Qot_Common
 {RetType} = futuApi.Common
 {ModifyOrderOp, OrderType, OrderStatus, SecurityFirm, TrdEnv, TrdMarket, TrdSecMarket, TrdSide, TimeInForce, TrdCategory} = futuApi.Trd_Common
 
@@ -484,6 +484,14 @@ class Futu extends Broker
         securityList: [{market: m, code}]
     [ret, ...] = (Futu.errHandler await @ws.GetBasicQot req).basicQotList
     ret
+
+  plateSet: ->
+    logger.debug PlateSetType
+    opts =
+      c2s:
+        market: Futu.marketMap['hk']
+        plateSetType: PlateSetType.PlateSetType_All
+    Futu.errHandler (await @ws.GetPlateSet opts)
 
   plateSecurity: ({market, code} = {}) ->
     market ?= 'hk'

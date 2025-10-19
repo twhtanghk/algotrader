@@ -19,6 +19,9 @@
     <template #close-cell='{row}'>
       {{row.original.close?.toFixed(2)}}
     </template>
+    <template #delta-cell='{row}'>
+      {{row.original.delta?.toFixed(2)}}
+    </template>
     <template #pe-cell='{row}'>
       {{row.original.pe?.toFixed(2)}}
     </template>
@@ -31,7 +34,7 @@
 
 <script setup>
 import {reactive, ref} from 'vue'
-import {socket, watchlist, quote, basic} from './socket'
+import {socket, watchlist, quote, delta, basic} from './socket'
 import {h, resolveComponent} from 'vue'
 
 const config = useRuntimeConfig()
@@ -47,6 +50,7 @@ const columns = [
   {accessorKey: 'high', header: 'High'},
   {accessorKey: 'low', header: 'Low'},
   {accessorKey: 'close', header: 'Close'},
+  {accessorKey: 'delta', header: ({column}) => colHead(UButton, column, {label: 'Delta'})},
   {accessorKey: 'pe', header: ({column}) => colHead(UButton, column, {label: 'PE'})},
   {accessorKey: 'pb', header: ({column}) => colHead(UButton, column, {label: 'PB'})},
 ]
@@ -75,6 +79,7 @@ socket
   .on('watchlist', watchlist(items))
   .on('quote', quote(items))
   .on('basic', basic(items))
+  .on('delta', delta(items))
 </script>
 
 <style>

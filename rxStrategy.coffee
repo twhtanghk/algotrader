@@ -3,8 +3,7 @@ import * as Promise from 'bluebird'
 import moment from 'moment'
 import stats from 'stats-lite'
 import {EventEmitter} from 'events'
-import {constituent, history, data} from './rxData'
-import {ohlc} from './analysis'
+import {ohlc} from './analysis.js'
 import {take, tap, zip, bufferCount, concat, filter, toArray, map, takeLast, buffer, last} from 'rxjs'
 
 find = {}
@@ -199,7 +198,7 @@ indicator = (size=20) -> (obs) ->
 # get constituent stocks of input index and sort by risk (stdev)
 orderByRisk = (broker, idx='HSI Constituent', chunkSize=180) ->
   list = await Promise
-    .mapSeries (await constituent broker, idx), (code) ->
+    .mapSeries (await broker.plateSecurity code: idx), (code) ->
       await Promise.delay 1000
       beginTime = moment()
         .subtract 6, 'month'
@@ -218,6 +217,23 @@ orderByRisk = (broker, idx='HSI Constituent', chunkSize=180) ->
     .sort (stockA, stockB) ->
       stockA.last['close.stdev'] - stockB.last['close.stdev']
         
+# get delta of specified code
+export delta = (opts={}) ->
+  {broker, code, beginTime, chunkSize} = opts
+  beginTime ?= moment()
+    .subtract 6, 'month'
+  chunkSize ?= 60
+  opts =
+    market: 'hk'
+    code: code
+    start: beginTime
+    freq: '1d'
+  (await broker.historyKL opts)
+    .pipe (takeLast chunkSize), toArray()
+    .pipe map (x) ->
+      [..., end] = x
+      _.extend opts, end, (meanClose x), (meanVol x)
+
 # get constituent stock of input index and sortlisted those stocks
 # not falling within the range [mean - n * stdev, mean + n * stdev]
 filterByStdev = (opts={}) ->
@@ -427,6 +443,7 @@ export default {
   stdev
   indicator
   orderByRisk
+  delta
   filterByStdev
   levelVol
   priceVol

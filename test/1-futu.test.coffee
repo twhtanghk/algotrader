@@ -4,6 +4,7 @@ import {describe, test} from 'vitest'
 import {Futu} from '../futu.js'
 import {inject} from 'ssl-root-cas'
 import {concat} from 'rxjs'
+import {delta} from '../rxStrategy.js'
 import {default as root} from '../logger'
 
 logger = root.child 
@@ -67,14 +68,19 @@ describe 'futu', ->
 
   test 'subInfo 2', ->
     console.log JSON.stringify (await futu.subInfo()), null, 2
-###
+
   test 'unsubAll', ->
     await Promise.delay 60000
     console.log JSON.stringify (await futu.unsubAll()), null, 2
-###
+
   test 'subInfo 3', ->
     console.log JSON.stringify (await futu.subInfo()), null, 2
 
   test 'securitySnapshot', ->
     console.log JSON.stringify (await futu.securitySnapshot code: '00700'), null, 2
     console.log JSON.stringify (await futu.securitySnapshot code: 'LEN251030P12000'), null, 2
+
+  test 'delta', ->
+    (await delta {broker: futu, code: '00700'})
+      .subscribe (x) ->
+        logger.info JSON.stringify x, null, 2

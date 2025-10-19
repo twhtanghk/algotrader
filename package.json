@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.coffee",
   "scripts": {
-    "build": "coffee -c analysis.coffee broker.coffee order.coffee futu.coffee logger.coffee test/1-futu.test.coffee",
+    "build": "coffee -c analysis.coffee broker.coffee order.coffee futu.coffee logger.coffee rxStrategy.coffee test/1-futu.test.coffee",
     "clean": "rm *.js test/*.js",
     "test": "vitest --testTimeout=80000"
   },
