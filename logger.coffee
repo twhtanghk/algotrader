@@ -1,10 +1,8 @@
-import {createLogger} from 'bs-logger'
+import {createLogger, LogLevels} from 'bs-logger'
 
 opts =
   context:
     application: 'algotrader'
-  targets: 'stderr'
-if process.env.LOG_LEVEL
-  Object.assign opts, level: process.env.LOG_LEVEL
+  targets: "stderr:#{LogLevels[process.env.LOG_LEVEL || 'info']}%simple"
 
 export default createLogger opts

@@ -1,8 +1,16 @@
+import {default as Promise} from 'bluebird'
 import {Futu} from 'algotrader/futu.js'
 import {delta} from 'algotrader/rxStrategy.js'
 import {Server as Engine} from 'engine.io'
 import {Server} from 'socket.io'
 import {defineEventHandler} from 'h3'
+import {default as root} from 'algotrader/logger.js'
+import hsi from 'algotrader/hsi.json'
+
+const logger = root.child({
+  namespace: 'server/plugins/socket.io.ts',
+  targets: 'stderr%json'
+})
 
 export default defineNitroPlugin(async (app) => {
   const engine = new Engine()
@@ -19,6 +27,7 @@ export default defineNitroPlugin(async (app) => {
     // get delta
     (await delta({code, broker: app.broker}))
       .subscribe((data) => {
+	logger.debug(JSON.stringify(data, null, 2))
         socket.emit('delta', data)
       })
     // get basic data including pe, pb
@@ -37,14 +46,28 @@ export default defineNitroPlugin(async (app) => {
       .on('position', async (msg) => {
         const ret = await acc.position()
         socket.emit('position', ret)
-        for (const {code} of ret)
+        for (const {code} of ret) {
+          await Promise.delay(1000)
           detail(socket, code)
+        }
       })
       .on('watchlist', async (msg) => {
         const {name} = msg
-        if (process.env[name]) {
-          for (const code of process.env[name].split(','))
-            detail(socket, code)
+	switch (name) {
+	  case 'hsi':
+            for await (const row of hsi.constituents) {
+              await Promise.delay(1000)
+	      detail(socket, '0' + row['stock_code'])
+	    }
+	    break
+	  default:
+            if (process.env[name]) {
+              for (const code of process.env[name].split(',')) {
+                await Promise.delay(1000)
+                detail(socket, code)
+              }
+	    }
+	    break
 	}
       })
   })

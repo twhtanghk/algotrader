@@ -1,0 +1,701 @@
+{
+  "index_name": "Hang Seng Index",
+  "market": "Hong Kong Stock Exchange",
+  "last_updated": "2024-10-19",
+  "number_of_constituents": 82,
+  "constituents": [
+    {
+      "stock_code": "0001",
+      "company_name": "CK Hutchison Holdings Ltd",
+      "english_name": "CK Hutchison Holdings Limited",
+      "sector": "Conglomerates",
+      "weighting": 0.68
+    },
+    {
+      "stock_code": "0002",
+      "company_name": "CLP Holdings Ltd",
+      "english_name": "CLP Holdings Limited",
+      "sector": "Utilities",
+      "weighting": 0.56
+    },
+    {
+      "stock_code": "0003",
+      "company_name": "Hong Kong & China Gas Co Ltd",
+      "english_name": "The Hong Kong and China Gas Company Limited",
+      "sector": "Utilities",
+      "weighting": 0.41
+    },
+    {
+      "stock_code": "0005",
+      "company_name": "HSBC Holdings Plc",
+      "english_name": "HSBC Holdings plc",
+      "sector": "Financials",
+      "weighting": 7.12
+    },
+    {
+      "stock_code": "0011",
+      "company_name": "Hang Seng Bank Ltd",
+      "english_name": "Hang Seng Bank Limited",
+      "sector": "Financials",
+      "weighting": 0.61
+    },
+    {
+      "stock_code": "0016",
+      "company_name": "Sun Hung Kai Properties Ltd",
+      "english_name": "Sun Hung Kai Properties Limited",
+      "sector": "Properties & Construction",
+      "weighting": 1.92
+    },
+    {
+      "stock_code": "0017",
+      "company_name": "New World Development Co Ltd",
+      "english_name": "New World Development Company Limited",
+      "sector": "Properties & Construction",
+      "weighting": 0.17
+    },
+    {
+      "stock_code": "0027",
+      "company_name": "Galaxy Entertainment Group Ltd",
+      "english_name": "Galaxy Entertainment Group Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.72
+    },
+    {
+      "stock_code": "0066",
+      "company_name": "MTR Corporation Ltd",
+      "english_name": "MTR Corporation Limited",
+      "sector": "Industrials",
+      "weighting": 0.67
+    },
+    {
+      "stock_code": "0083",
+      "company_name": "Sino Land Co Ltd",
+      "english_name": "Sino Land Company Limited",
+      "sector": "Properties & Construction",
+      "weighting": 0.28
+    },
+    {
+      "stock_code": "0101",
+      "company_name": "Hang Lung Properties Ltd",
+      "english_name": "Hang Lung Properties Limited",
+      "sector": "Properties & Construction",
+      "weighting": 0.16
+    },
+    {
+      "stock_code": "0135",
+      "company_name": "Kunlun Energy Co Ltd",
+      "english_name": "Kunlun Energy Company Limited",
+      "sector": "Energy",
+      "weighting": 0.11
+    },
+    {
+      "stock_code": "0144",
+      "company_name": "China Merchants Port Holdings Co Ltd",
+      "english_name": "China Merchants Port Holdings Company Limited",
+      "sector": "Industrials",
+      "weighting": 0.06
+    },
+    {
+      "stock_code": "0151",
+      "company_name": "Want Want China Holdings Ltd",
+      "english_name": "Want Want China Holdings Limited",
+      "sector": "Consumer Staples",
+      "weighting": 0.19
+    },
+    {
+      "stock_code": "0175",
+      "company_name": "Geely Automobile Holdings Ltd",
+      "english_name": "Geely Automobile Holdings Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.38
+    },
+    {
+      "stock_code": "0267",
+      "company_name": "CITIC Ltd",
+      "english_name": "CITIC Limited",
+      "sector": "Conglomerates",
+      "weighting": 0.37
+    },
+    {
+      "stock_code": "0288",
+      "company_name": "WH Group Ltd",
+      "english_name": "WH Group Limited",
+      "sector": "Consumer Staples",
+      "weighting": 0.17
+    },
+    {
+      "stock_code": "0291",
+      "company_name": "China Resources Beer Holdings Co Ltd",
+      "english_name": "China Resources Beer (Holdings) Company Limited",
+      "sector": "Consumer Staples",
+      "weighting": 0.44
+    },
+    {
+      "stock_code": "0293",
+      "company_name": "Cathay Pacific Airways Ltd",
+      "english_name": "Cathay Pacific Airways Limited",
+      "sector": "Industrials",
+      "weighting": 0.14
+    },
+    {
+      "stock_code": "0322",
+      "company_name": "Tingyi Holding Corp",
+      "english_name": "Tingyi (Cayman Islands) Holding Corp.",
+      "sector": "Consumer Staples",
+      "weighting": 0.17
+    },
+    {
+      "stock_code": "0386",
+      "company_name": "China Petroleum & Chemical Corp",
+      "english_name": "China Petroleum & Chemical Corporation",
+      "sector": "Energy",
+      "weighting": 0.57
+    },
+    {
+      "stock_code": "0388",
+      "company_name": "Hong Kong Exchanges and Clearing Ltd",
+      "english_name": "Hong Kong Exchanges and Clearing Limited",
+      "sector": "Financials",
+      "weighting": 3.34
+    },
+    {
+      "stock_code": "0552",
+      "company_name": "China Communications Services Corp Ltd",
+      "english_name": "China Communications Services Corporation Limited",
+      "sector": "Information Technology",
+      "weighting": 0.05
+    },
+    {
+      "stock_code": "0688",
+      "company_name": "China Overseas Land & Investment Ltd",
+      "english_name": "China Overseas Land & Investment Limited",
+      "sector": "Properties & Construction",
+      "weighting": 0.44
+    },
+    {
+      "stock_code": "0700",
+      "company_name": "Tencent Holdings Ltd",
+      "english_name": "Tencent Holdings Limited",
+      "sector": "Information Technology",
+      "weighting": 5.89
+    },
+    {
+      "stock_code": "0762",
+      "company_name": "China Unicom Hong Kong Ltd",
+      "english_name": "China Unicom (Hong Kong) Limited",
+      "sector": "Telecommunications",
+      "weighting": 0.16
+    },
+    {
+      "stock_code": "0823",
+      "company_name": "Link REIT",
+      "english_name": "Link Real Estate Investment Trust",
+      "sector": "Real Estate Investment Trusts",
+      "weighting": 0.76
+    },
+    {
+      "stock_code": "0836",
+      "company_name": "China Resources Power Holdings Co Ltd",
+      "english_name": "China Resources Power Holdings Company Limited",
+      "sector": "Utilities",
+      "weighting": 0.21
+    },
+    {
+      "stock_code": "0857",
+      "company_name": "PetroChina Co Ltd",
+      "english_name": "PetroChina Company Limited",
+      "sector": "Energy",
+      "weighting": 0.47
+    },
+    {
+      "stock_code": "0868",
+      "company_name": "Xinyi Glass Holdings Ltd",
+      "english_name": "Xinyi Glass Holdings Limited",
+      "sector": "Industrials",
+      "weighting": 0.09
+    },
+    {
+      "stock_code": "0880",
+      "company_name": "SJM Holdings Ltd",
+      "english_name": "SJM Holdings Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.09
+    },
+    {
+      "stock_code": "0881",
+      "company_name": "Zhongsheng Group Holdings Ltd",
+      "english_name": "Zhongsheng Group Holdings Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.11
+    },
+    {
+      "stock_code": "0883",
+      "company_name": "CNOOC Ltd",
+      "english_name": "CNOOC Limited",
+      "sector": "Energy",
+      "weighting": 1.44
+    },
+    {
+      "stock_code": "0939",
+      "company_name": "China Construction Bank Corp",
+      "english_name": "China Construction Bank Corporation",
+      "sector": "Financials",
+      "weighting": 4.27
+    },
+    {
+      "stock_code": "0941",
+      "company_name": "China Mobile Ltd",
+      "english_name": "China Mobile Limited",
+      "sector": "Telecommunications",
+      "weighting": 3.21
+    },
+    {
+      "stock_code": "0960",
+      "company_name": "Longfor Group Holdings Ltd",
+      "english_name": "Longfor Group Holdings Limited",
+      "sector": "Properties & Construction",
+      "weighting": 0.16
+    },
+    {
+      "stock_code": "0968",
+      "company_name": "Xinyi Solar Holdings Ltd",
+      "english_name": "Xinyi Solar Holdings Limited",
+      "sector": "Information Technology",
+      "weighting": 0.12
+    },
+    {
+      "stock_code": "0981",
+      "company_name": "Semiconductor Manufacturing International Corp",
+      "english_name": "Semiconductor Manufacturing International Corporation",
+      "sector": "Information Technology",
+      "weighting": 0.57
+    },
+    {
+      "stock_code": "0992",
+      "company_name": "Lenovo Group Ltd",
+      "english_name": "Lenovo Group Limited",
+      "sector": "Information Technology",
+      "weighting": 0.31
+    },
+    {
+      "stock_code": "0998",
+      "company_name": "China CITIC Bank Corp Ltd",
+      "english_name": "China CITIC Bank Corporation Limited",
+      "sector": "Financials",
+      "weighting": 0.16
+    },
+    {
+      "stock_code": "1038",
+      "company_name": "CK Infrastructure Holdings Ltd",
+      "english_name": "CK Infrastructure Holdings Limited",
+      "sector": "Utilities",
+      "weighting": 0.32
+    },
+    {
+      "stock_code": "1044",
+      "company_name": "Hengan International Group Co Ltd",
+      "english_name": "Hengan International Group Company Limited",
+      "sector": "Consumer Staples",
+      "weighting": 0.09
+    },
+    {
+      "stock_code": "1060",
+      "company_name": "Alibaba Health Information Technology Ltd",
+      "english_name": "Alibaba Health Information Technology Limited",
+      "sector": "Healthcare",
+      "weighting": 0.13
+    },
+    {
+      "stock_code": "1088",
+      "company_name": "China Shenhua Energy Co Ltd",
+      "english_name": "China Shenhua Energy Company Limited",
+      "sector": "Energy",
+      "weighting": 0.48
+    },
+    {
+      "stock_code": "1093",
+      "company_name": "China Pharmaceutical Enterprise Co Ltd",
+      "english_name": "China Pharmaceutical Enterprise Co., Limited",
+      "sector": "Healthcare",
+      "weighting": 0.03
+    },
+    {
+      "stock_code": "1109",
+      "company_name": "China Resources Land Ltd",
+      "english_name": "China Resources Land Limited",
+      "sector": "Properties & Construction",
+      "weighting": 0.56
+    },
+    {
+      "stock_code": "1128",
+      "company_name": "Wynn Macau Ltd",
+      "english_name": "Wynn Macau, Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.13
+    },
+    {
+      "stock_code": "1171",
+      "company_name": "Yanzhou Coal Mining Co Ltd",
+      "english_name": "Yanzhou Coal Mining Company Limited",
+      "sector": "Energy",
+      "weighting": 0.11
+    },
+    {
+      "stock_code": "1211",
+      "company_name": "BYD Co Ltd",
+      "english_name": "BYD Company Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 1.31
+    },
+    {
+      "stock_code": "1288",
+      "company_name": "Agricultural Bank of China Ltd",
+      "english_name": "Agricultural Bank of China Limited",
+      "sector": "Financials",
+      "weighting": 1.56
+    },
+    {
+      "stock_code": "1299",
+      "company_name": "AIA Group Ltd",
+      "english_name": "AIA Group Limited",
+      "sector": "Financials",
+      "weighting": 7.83
+    },
+    {
+      "stock_code": "1378",
+      "company_name": "China Hongqiao Group Ltd",
+      "english_name": "China Hongqiao Group Limited",
+      "sector": "Industrials",
+      "weighting": 0.06
+    },
+    {
+      "stock_code": "1398",
+      "company_name": "Industrial and Commercial Bank of China Ltd",
+      "english_name": "Industrial and Commercial Bank of China Limited",
+      "sector": "Financials",
+      "weighting": 3.12
+    },
+    {
+      "stock_code": "1810",
+      "company_name": "Xiaomi Corp",
+      "english_name": "Xiaomi Corporation",
+      "sector": "Information Technology",
+      "weighting": 0.53
+    },
+    {
+      "stock_code": "1876",
+      "company_name": "Budweiser Brewing Co APAC Ltd",
+      "english_name": "Budweiser Brewing Company APAC Limited",
+      "sector": "Consumer Staples",
+      "weighting": 0.49
+    },
+    {
+      "stock_code": "1928",
+      "company_name": "Sands China Ltd",
+      "english_name": "Sands China Ltd.",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.44
+    },
+    {
+      "stock_code": "1929",
+      "company_name": "Chow Tai Fook Jewellery Group Ltd",
+      "english_name": "Chow Tai Fook Jewellery Group Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.14
+    },
+    {
+      "stock_code": "2020",
+      "company_name": "ANTA Sports Products Ltd",
+      "english_name": "ANTA Sports Products Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.62
+    },
+    {
+      "stock_code": "2269",
+      "company_name": "Wuxi Biologics Cayman Inc",
+      "english_name": "Wuxi Biologics (Cayman) Inc.",
+      "sector": "Healthcare",
+      "weighting": 0.66
+    },
+    {
+      "stock_code": "2313",
+      "company_name": "Shenzhou International Group Holdings Ltd",
+      "english_name": "Shenzhou International Group Holdings Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.22
+    },
+    {
+      "stock_code": "2318",
+      "company_name": "Ping An Insurance Group Co of China Ltd",
+      "english_name": "Ping An Insurance (Group) Company of China, Ltd.",
+      "sector": "Financials",
+      "weighting": 3.56
+    },
+    {
+      "stock_code": "2319",
+      "company_name": "China Mengniu Dairy Co Ltd",
+      "english_name": "China Mengniu Dairy Company Limited",
+      "sector": "Consumer Staples",
+      "weighting": 0.41
+    },
+    {
+      "stock_code": "2331",
+      "company_name": "Li Ning Co Ltd",
+      "english_name": "Li Ning Company Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.15
+    },
+    {
+      "stock_code": "2382",
+      "company_name": "Sunny Optical Technology Group Co Ltd",
+      "english_name": "Sunny Optical Technology (Group) Company Limited",
+      "sector": "Information Technology",
+      "weighting": 0.13
+    },
+    {
+      "stock_code": "2388",
+      "company_name": "BOC Hong Kong Holdings Ltd",
+      "english_name": "BOC Hong Kong (Holdings) Limited",
+      "sector": "Financials",
+      "weighting": 1.02
+    },
+    {
+      "stock_code": "2600",
+      "company_name": "Aluminum Corp of China Ltd",
+      "english_name": "Aluminum Corporation of China Limited",
+      "sector": "Industrials",
+      "weighting": 0.05
+    },
+    {
+      "stock_code": "2601",
+      "company_name": "China Pacific Insurance Group Co Ltd",
+      "english_name": "China Pacific Insurance (Group) Co., Ltd.",
+      "sector": "Financials",
+      "weighting": 0.38
+    },
+    {
+      "stock_code": "2628",
+      "company_name": "China Life Insurance Co Ltd",
+      "english_name": "China Life Insurance Company Limited",
+      "sector": "Financials",
+      "weighting": 0.71
+    },
+    {
+      "stock_code": "2688",
+      "company_name": "ENN Energy Holdings Ltd",
+      "english_name": "ENN Energy Holdings Limited",
+      "sector": "Utilities",
+      "weighting": 0.27
+    },
+    {
+      "stock_code": "2689",
+      "company_name": "Nine Dragons Paper Holdings Ltd",
+      "english_name": "Nine Dragons Paper (Holdings) Limited",
+      "sector": "Industrials",
+      "weighting": 0.04
+    },
+    {
+      "stock_code": "2899",
+      "company_name": "Zijin Mining Group Co Ltd",
+      "english_name": "Zijin Mining Group Company Limited",
+      "sector": "Materials",
+      "weighting": 0.47
+    },
+    {
+      "stock_code": "3690",
+      "company_name": "Meituan",
+      "english_name": "Meituan",
+      "sector": "Information Technology",
+      "weighting": 4.26
+    },
+    {
+      "stock_code": "3968",
+      "company_name": "China Merchants Bank Co Ltd",
+      "english_name": "China Merchants Bank Co., Ltd.",
+      "sector": "Financials",
+      "weighting": 2.11
+    },
+    {
+      "stock_code": "3988",
+      "company_name": "Bank of China Ltd",
+      "english_name": "Bank of China Limited",
+      "sector": "Financials",
+      "weighting": 1.78
+    },
+    {
+      "stock_code": "6030",
+      "company_name": "Citigroup Inc",
+      "english_name": "Citigroup Inc.",
+      "sector": "Financials",
+      "weighting": 0.89
+    },
+    {
+      "stock_code": "6098",
+      "company_name": "Country Garden Services Holdings Co Ltd",
+      "english_name": "Country Garden Services Holdings Company Limited",
+      "sector": "Properties & Construction",
+      "weighting": 0.08
+    },
+    {
+      "stock_code": "6862",
+      "company_name": "Haidilao International Holding Ltd",
+      "english_name": "Haidilao International Holding Ltd.",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.17
+    },
+    {
+      "stock_code": "6881",
+      "company_name": "China Galaxy Securities Co Ltd",
+      "english_name": "China Galaxy Securities Co., Ltd.",
+      "sector": "Financials",
+      "weighting": 0.09
+    },
+    {
+      "stock_code": "6969",
+      "company_name": "TravelSky Technology Ltd",
+      "english_name": "TravelSky Technology Limited",
+      "sector": "Information Technology",
+      "weighting": 0.07
+    },
+    {
+      "stock_code": "6988",
+      "company_name": "China Tower Corp Ltd",
+      "english_name": "China Tower Corporation Limited",
+      "sector": "Telecommunications",
+      "weighting": 0.16
+    },
+    {
+      "stock_code": "6993",
+      "company_name": "Blue Moon Group Holdings Ltd",
+      "english_name": "Blue Moon Group Holdings Limited",
+      "sector": "Consumer Staples",
+      "weighting": 0.03
+    },
+    {
+      "stock_code": "8083",
+      "company_name": "China Literature Ltd",
+      "english_name": "China Literature Limited",
+      "sector": "Information Technology",
+      "weighting": 0.04
+    },
+    {
+      "stock_code": "8168",
+      "company_name": "Xinyi Energy Holdings Ltd",
+      "english_name": "Xinyi Energy Holdings Limited",
+      "sector": "Utilities",
+      "weighting": 0.03
+    },
+    {
+      "stock_code": "8282",
+      "company_name": "CMOC Group Ltd",
+      "english_name": "CMOC Group Limited",
+      "sector": "Materials",
+      "weighting": 0.14
+    },
+    {
+      "stock_code": "8341",
+      "company_name": "Venus Medtech Hangzhou Inc",
+      "english_name": "Venus Medtech (Hangzhou) Inc.",
+      "sector": "Healthcare",
+      "weighting": 0.02
+    },
+    {
+      "stock_code": "8368",
+      "company_name": "China International Capital Corp Ltd",
+      "english_name": "China International Capital Corporation Limited",
+      "sector": "Financials",
+      "weighting": 0.17
+    },
+    {
+      "stock_code": "9618",
+      "company_name": "JD.com Inc",
+      "english_name": "JD.com, Inc.",
+      "sector": "Information Technology",
+      "weighting": 0.76
+    },
+    {
+      "stock_code": "9633",
+      "company_name": "Nongfu Spring Co Ltd",
+      "english_name": "Nongfu Spring Co., Ltd.",
+      "sector": "Consumer Staples",
+      "weighting": 0.42
+    },
+    {
+      "stock_code": "9668",
+      "company_name": "Bilibili Inc",
+      "english_name": "Bilibili Inc.",
+      "sector": "Information Technology",
+      "weighting": 0.11
+    },
+    {
+      "stock_code": "9688",
+      "company_name": "Zhongsheng Group Holdings Ltd",
+      "english_name": "Zhongsheng Group Holdings Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.11
+    },
+    {
+      "stock_code": "9698",
+      "company_name": "Xpeng Inc",
+      "english_name": "XPeng Inc.",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.09
+    },
+    {
+      "stock_code": "9868",
+      "company_name": "Xiaomi Corp",
+      "english_name": "Xiaomi Corporation",
+      "sector": "Information Technology",
+      "weighting": 0.53
+    },
+    {
+      "stock_code": "9888",
+      "company_name": "Baidu Inc",
+      "english_name": "Baidu, Inc.",
+      "sector": "Information Technology",
+      "weighting": 0.33
+    },
+    {
+      "stock_code": "9898",
+      "company_name": "Li Auto Inc",
+      "english_name": "Li Auto Inc.",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.22
+    },
+    {
+      "stock_code": "9922",
+      "company_name": "Nine Dragons Paper Holdings Ltd",
+      "english_name": "Nine Dragons Paper (Holdings) Limited",
+      "sector": "Industrials",
+      "weighting": 0.04
+    },
+    {
+      "stock_code": "9961",
+      "company_name": "Trip.com Group Ltd",
+      "english_name": "Trip.com Group Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.16
+    },
+    {
+      "stock_code": "9968",
+      "company_name": "Huazhu Group Ltd",
+      "english_name": "Huazhu Group Limited",
+      "sector": "Consumer Discretionary",
+      "weighting": 0.07
+    },
+    {
+      "stock_code": "9988",
+      "company_name": "Alibaba Group Holding Ltd",
+      "english_name": "Alibaba Group Holding Limited",
+      "sector": "Information Technology",
+      "weighting": 5.12
+    },
+    {
+      "stock_code": "9999",
+      "company_name": "NetEase Inc",
+      "english_name": "NetEase, Inc.",
+      "sector": "Information Technology",
+      "weighting": 0.67
+    }
+  ]
+}

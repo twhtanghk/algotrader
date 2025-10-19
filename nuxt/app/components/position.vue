@@ -16,6 +16,9 @@
     <template #price-cell='{row}'>
       {{row.original.price.toFixed(2)}}
     </template>
+    <template #delta-cell='{row}'>
+      {{row.original.delta?.toFixed(2)}}
+    </template>
     <template #pe-cell='{row}'>
       {{row.original.pe?.toFixed(2)}}
     </template>
@@ -44,7 +47,7 @@
 <script setup>
 import {reactive} from 'vue'
 import {OrderCreate} from '#components'
-import {socket, position, quote, basic} from './socket'
+import {socket, position, quote, basic, delta} from './socket'
 import {h, resolveComponent} from 'vue'
 
 const UButton = resolveComponent('UButton')
@@ -62,6 +65,7 @@ const columns = [
   {accessorKey: 'qty', header: 'Qty'},
   {accessorKey: 'costPrice', header: 'Cost'},
   {accessorKey: 'price', header: 'Price'},
+  {accessorKey: 'delta', header: ({column}) => colHead(UButton, column, {label: 'Delta'})},
   {accessorKey: 'pe', header: ({column}) => colHead(UButton, column, {label: 'PE'})},
   {accessorKey: 'pb', header: ({column}) => colHead(UButton, column, {label: 'PB'})},
   {accessorKey: 'val', header: ({column}) => colHead(UButton, column, {label: 'Value'})},
@@ -90,8 +94,8 @@ const colHead = (el, col, opts) => {
   opts.onClick = () => col.toggleSorting(col.getIsSorted() === 'asc')
   return h(UButton, opts)
 }
-const plRatio = ({costPrice, price}) => {
-  return (price - costPrice) / costPrice * 100
+const plRatio = ({qty, costPrice, price}) => {
+  return Math.sign(qty) * (price - costPrice) / costPrice * 100
 }
 
 socket
@@ -101,6 +105,7 @@ socket
   .on('position', position(items))
   .on('quote', quote(items))
   .on('basic', basic(items))
+  .on('delta', delta(items))
 </script>
 
 <style>
