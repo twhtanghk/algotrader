@@ -11,7 +11,7 @@
       </div>
     </template>
     <template #costPrice-cell='{row}'>
-      {{row.original.costPrice.toFixed(2)}}
+      {{row.original.averageCostPrice.toFixed(2)}}
     </template>
     <template #price-cell='{row}'>
       {{row.original.price.toFixed(2)}}
@@ -30,7 +30,7 @@
     </template>
     <template #plVal-cell='{row}'>
       <div :class="row.original.plVal < 0 ? 'loss' : 'profit'">
-        {{row.original.plVal.toLocaleString()}}
+        {{plVal(row.original).toLocaleString()}}
       </div>
     </template>
     <template #plRatio-cell='{row}'>
@@ -94,8 +94,11 @@ const colHead = (el, col, opts) => {
   opts.onClick = () => col.toggleSorting(col.getIsSorted() === 'asc')
   return h(UButton, opts)
 }
-const plRatio = ({qty, costPrice, price}) => {
-  return Math.sign(qty) * (price - costPrice) / costPrice * 100
+const plVal = ({qty, averageCostPrice, price}) => {
+  return (price - averageCostPrice) * qty
+}
+const plRatio = ({qty, averageCostPrice, price}) => {
+  return Math.sign(qty) * (price - averageCostPrice) / averageCostPrice * 100
 }
 
 socket
@@ -114,5 +117,8 @@ socket
 }
 .profit {
   color: green
+}
+tbody tr:hover {
+  background-color: #f0f0f0;
 }
 </style>

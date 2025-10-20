@@ -31,18 +31,7 @@ describe 'futu', ->
 
   test 'position', ->
     ret = await (await accounts[0]).position()
-    console.log ret.map (stock) ->
-      _.pick stock, [
-        'code'
-        'name'
-        'qty'
-        'canSellQty'
-        'price' 
-        'costPrice'
-        'val'
-        'plVal'
-        'plRatio'
-      ]
+    logger.info JSON.stringify ret, null, 2
 
   test 'orders', ->
     acc.subscribe console.log

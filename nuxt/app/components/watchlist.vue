@@ -89,4 +89,7 @@ socket
 .profit {
   color: green
 }
+tbody tr:hover {
+  background-color: #f0f0f0;
+}
 </style>
