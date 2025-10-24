@@ -7,9 +7,7 @@ import {concat} from 'rxjs'
 import {delta} from '../rxStrategy.js'
 import {default as root} from '../logger'
 
-logger = root.child 
-  namespace: 'futu.test'
-  targets: 'stderr%json'
+logger = root.child namespace: 'futu.test'
 
 describe 'futu', ->
   inject()
@@ -18,8 +16,8 @@ describe 'futu', ->
   acc = await accounts[0]
 
   test 'constant', ->
-    console.log Futu.constant
-    console.log Futu.invert
+    logger.info Futu.constant
+    logger.info Futu.invert
 
   test 'cash', ->
     console.log _.pick await acc.cash(), [

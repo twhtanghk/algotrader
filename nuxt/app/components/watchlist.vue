@@ -28,6 +28,9 @@
     <template #pb-cell='{row}'>
       {{row.original.pb?.toFixed(2)}}
     </template>
+    <template #div-cell='{row}'>
+      {{row.original.div?.toFixed(2)}}%
+    </template>
   </UTable>
 </div>
 </template>
@@ -53,6 +56,7 @@ const columns = [
   {accessorKey: 'delta', header: ({column}) => colHead(UButton, column, {label: 'Delta'})},
   {accessorKey: 'pe', header: ({column}) => colHead(UButton, column, {label: 'PE'})},
   {accessorKey: 'pb', header: ({column}) => colHead(UButton, column, {label: 'PB'})},
+  {accessorKey: 'div', header: ({column}) => colHead(UButton, column, {label: 'Div%'})},
 ]
 const sort = ref([
   {id: 'name', desc: true}

@@ -34,12 +34,12 @@ export const delta = (items) => { return (msg) => {
 
 export const basic = (items) => { return (msg) => {
   const {code, type, data, owner} = msg
-  let ret = _.pick(data, 'peRate', 'pbRate')
+  let ret = _.pick(data, 'peRate', 'pbRate', 'dividendLFYRatio')
   if (type == 8) {
-    ret = _.pick(owner, 'peRate', 'pbRate')
+    ret = _.pick(owner, 'peRate', 'pbRate', 'dividendLFYRatio')
     _.extend(owner, data.owner)
   }
-  _.extend(msg, {pe: ret.peRate, pb: ret.pbRate})
+  _.extend(msg, {pe: ret.peRate, pb: ret.pbRate, div: ret.dividendLFYRatio})
 
   const found = _.find(items, {code})
   if (found)

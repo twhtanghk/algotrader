@@ -38,6 +38,9 @@
         {{plRatio(row.original).toFixed(2)}}%
       </div>
     </template>
+    <template #div-cell='{row}'>
+      {{row.original.div?.toFixed(2)}}%
+    </template>
     <template #action-cell='{row}'>
       <UButton @click='trade(row.original)'>Trade</UButton>
     </template>
@@ -71,6 +74,7 @@ const columns = [
   {accessorKey: 'val', header: ({column}) => colHead(UButton, column, {label: 'Value'})},
   {accessorKey: 'plVal', header: ({column}) => colHead(UButton, column, {label: 'PL'})},
   {accessorKey: 'plRatio', header: ({column}) => colHead(UButton, column, {label: 'PL%'})},
+  {accessorKey: 'div', header: ({column}) => colHead(UButton, column, {label: 'Div%'})},
   {accessorKey: 'action', header: ''}
 ]
 const modal = overlay.create(OrderCreate, {
