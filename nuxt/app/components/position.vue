@@ -65,7 +65,7 @@ const newOrder = reactive({
 const columns = [
   {accessorKey: 'code', header: ({column}) => colHead(UButton, column, {label: 'Code'})},
   {accessorKey: 'name', header: ({column}) => colHead(UButton, column, {label: 'Name'})},
-  {accessorKey: 'qty', header: 'Qty'},
+  {accessorKey: 'qty', header: ({column}) => colHead(UButton, column, {label: 'Qty'})},
   {accessorKey: 'costPrice', header: 'Cost'},
   {accessorKey: 'price', header: 'Price'},
   {accessorKey: 'delta', header: ({column}) => colHead(UButton, column, {label: 'Delta'})},

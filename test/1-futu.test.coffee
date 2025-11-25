@@ -2,15 +2,12 @@ import _ from 'lodash'
 import {Promise} from 'bluebird'
 import {describe, test} from 'vitest'
 import {Futu} from '../futu.js'
-import {inject} from 'ssl-root-cas'
-import {concat} from 'rxjs'
 import {delta} from '../rxStrategy.js'
 import {default as root} from '../logger'
 
 logger = root.child namespace: 'futu.test'
 
 describe 'futu', ->
-  inject()
   futu = await new Futu()
   accounts = await futu.accounts()
   acc = await accounts[0]
