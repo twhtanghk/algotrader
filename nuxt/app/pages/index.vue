@@ -1,6 +1,6 @@
 <template>
   <UApp>
-    <position :account='account' />
+    <position />
     <!--order :account='account' /-->
   </UApp>
 </template>
