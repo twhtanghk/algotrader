@@ -486,7 +486,6 @@ class Futu extends Broker
     ret
 
   plateSet: ->
-    logger.debug PlateSetType
     opts =
       c2s:
         market: Futu.marketMap['hk']
