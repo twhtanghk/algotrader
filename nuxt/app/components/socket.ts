@@ -13,6 +13,10 @@ export const watchlist = (items) => { return (msg) => {
     items.unshift(stock)
 }}
 
+export const plate = (items) => { return (msg) => {
+  items.unshift(msg)
+}}
+
 export const quote = (items) => { return (msg) => {
   const {code, close} = msg
   _.extend(_.find(items, {code}), {

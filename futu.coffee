@@ -490,7 +490,9 @@ class Futu extends Broker
       c2s:
         market: Futu.marketMap['hk']
         plateSetType: PlateSetType.PlateSetType_All
-    Futu.errHandler (await @ws.GetPlateSet opts)
+    (Futu.errHandler (await @ws.GetPlateSet opts)).plateInfoList.map ({plate, name}) ->
+      code: plate.code
+      name: name
 
   plateSecurity: ({market, code} = {}) ->
     market ?= 'hk'

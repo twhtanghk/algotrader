@@ -12,6 +12,8 @@ const logger = root.child({
   targets: 'stderr%json'
 })
 
+const sleep = 2000
+
 export default defineNitroPlugin(async (app) => {
   const engine = new Engine()
   const io = new Server()
@@ -31,7 +33,7 @@ export default defineNitroPlugin(async (app) => {
         socket.emit('delta', data)
       })
     // get basic data including pe, pb
-    socket.emit('basic', await broker.securitySnapshot({code}))
+    socket.emit('basic', await app.broker.securitySnapshot({code}))
   }
 
   app.broker = await new Futu()
@@ -47,7 +49,7 @@ export default defineNitroPlugin(async (app) => {
         const ret = await acc.position()
         socket.emit('position', ret)
         for (const {code} of ret) {
-          await Promise.delay(1000)
+          await Promise.delay(sleep)
           detail(socket, code)
         }
       })
@@ -56,18 +58,25 @@ export default defineNitroPlugin(async (app) => {
 	switch (name) {
 	  case 'hsi':
             for await (const row of hsi.constituents) {
-              await Promise.delay(1000)
+              await Promise.delay(sleep)
 	      detail(socket, '0' + row['stock_code'])
 	    }
 	    break
 	  default:
             if (process.env[name]) {
               for (const code of process.env[name].split(',')) {
-                await Promise.delay(1000)
+                await Promise.delay(sleep)
                 detail(socket, code)
               }
 	    }
 	    break
+	}
+      })
+      .on('plate', async (msg) => {
+        for (const sector of await app.broker.plateSet()) {
+          await Promise.delay(sleep)
+	  socket.emit('plate', sector)
+	  detail(socket, sector.code)
 	}
       })
   })
