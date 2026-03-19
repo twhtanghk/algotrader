@@ -31,6 +31,11 @@ export default defineNuxtConfig({
     public: { watchlist: process.env.watchlist }
   },
   ssr: false,
+  router: {
+    options: {
+      hashMode: true
+    }
+  },
   sourcemap: {
     server: true,
     client: true
