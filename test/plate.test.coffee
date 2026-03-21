@@ -13,3 +13,6 @@ describe 'futu', ->
 
   test 'plate', ->
     logger.info JSON.stringify await futu.plateSet()
+
+  test 'plateSecurity', ->
+    logger.info JSON.stringify await futu.plateSecurity code: 'LIST1267'

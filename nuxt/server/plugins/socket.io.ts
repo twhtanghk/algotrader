@@ -63,12 +63,15 @@ export default defineNitroPlugin(async (app) => {
 	    }
 	    break
 	  default:
-            if (process.env[name]) {
-              for (const code of process.env[name].split(',')) {
-                await Promise.delay(sleep)
-                detail(socket, code)
-              }
-	    }
+	    let codes = []
+	    if (process.env[name]) // watchlist
+              codes = process.env[name].split(',')
+            else // plate or sector
+              codes = (await app.broker.plateSecurity({code: name})).map(({code}) => { return code })
+            for (const code of codes) {
+              await Promise.delay(sleep)
+              detail(socket, code)
+            }
 	    break
 	}
       })

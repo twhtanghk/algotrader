@@ -1,7 +1,9 @@
 <template>
   <UTable sticky :data='items' :columns='columns' :sorting='sort'>
     <template #code-cell='{row}'>
-      {{row.original.code}}
+      <PlateUrl :code='row.original.code' :name='row.original.name'>
+        {{row.original.code}}
+      </PlateUrl>
     </template>
     <template #name-cell='{row}'>
       {{row.original.name}}
@@ -18,7 +20,7 @@ import {socket, position, quote, basic, delta, plate} from './socket'
 import {h, resolveComponent} from 'vue'
 
 const UButton = resolveComponent('UButton')
-const TVUrl= resolveComponent('tvurl')
+const PlateUrl= resolveComponent('plateurl')
 const overlay = useOverlay()
 const items = reactive([])
 const columns = [
