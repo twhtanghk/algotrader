@@ -62,7 +62,9 @@ describe 'futu', ->
 
   test 'securitySnapshot', ->
     console.log JSON.stringify (await futu.securitySnapshot code: '00700'), null, 2
-    console.log JSON.stringify (await futu.securitySnapshot code: 'LEN251030P12000'), null, 2
+    chain = await futu.optionChain code: '00992', strikeRange: [0, Infinity]
+    code = chain[0].option[0].put.basic.security.code
+    console.log JSON.stringify (await futu.securitySnapshot code: code), null, 2
 
   test 'delta', ->
     (await delta {broker: futu, code: '00700'})
