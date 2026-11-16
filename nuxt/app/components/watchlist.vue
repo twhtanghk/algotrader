@@ -1,6 +1,6 @@
 <template>
 <div>
-  <USelect v-model='name' :items='list'/>
+  <USelect v-model='name' :items='list' class='w-64'/>
   <stocks :code='name'/>
 </div>
 </template>
