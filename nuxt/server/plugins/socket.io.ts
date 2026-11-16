@@ -20,20 +20,51 @@ export default defineNitroPlugin(async (app) => {
   const broker = await new Futu()
   const accounts = await broker.accounts()
   const acc = await accounts[0]
-  const detail = async (socket, code) => {
+  const subscriptions = (socket) => {
+    if (!socket.data.subs)
+      socket.data.subs = new Map()
+    return socket.data.subs
+  }
+  const clear = (socket) => {
+    for (const subs of subscriptions(socket).values())
+      for (const sub of subs)
+        sub.unsubscribe?.()
+    subscriptions(socket).clear()
+  }
+  const detail = async (socket, code, generation) => {
+    const stale = () => generation != null && generation !== socket.data.generation
+    if (stale())
+      return
+    const subs = subscriptions(socket)
+    if (subs.has(code))
+      return
     // subscribe for quote update
-    (await app.broker.quote({code}))
-      .subscribe((data) => {
-        socket.emit('quote', data)
-      });
+    const quoteSource = await app.broker.quote({code})
+    if (stale())
+      return
+    const quote = quoteSource.subscribe((data) => {
+      socket.emit('quote', data)
+    });
     // get delta
-    (await delta({code, broker: app.broker}))
-      .subscribe((data) => {
-	logger.debug(JSON.stringify(data, null, 2))
-        socket.emit('delta', data)
-      })
+    const trendSource = await delta({code, broker: app.broker})
+    if (stale()) {
+      quote.unsubscribe()
+      return
+    }
+    const trend = trendSource.subscribe((data) => {
+      logger.debug(JSON.stringify(data, null, 2))
+      socket.emit('delta', data)
+    })
+    subs.set(code, [quote, trend])
     // get basic data including pe, pb
-    socket.emit('basic', await app.broker.securitySnapshot({code}))
+    const basic = await app.broker.securitySnapshot({code})
+    if (stale()) {
+      quote.unsubscribe()
+      trend.unsubscribe()
+      subs.delete(code)
+      return
+    }
+    socket.emit('basic', basic)
   }
 
   app.broker = await new Futu()
@@ -55,11 +86,18 @@ export default defineNitroPlugin(async (app) => {
       })
       .on('watchlist', async (msg) => {
         const {name} = msg
+        // stop streaming the previous selection and tell client to reset
+        clear(socket)
+        socket.data.generation = (socket.data.generation || 0) + 1
+        const generation = socket.data.generation
+        socket.emit('watchlist:clear')
 	switch (name) {
 	  case 'hsi':
             for await (const row of hsi.constituents) {
               await Promise.delay(sleep)
-	      detail(socket, '0' + row['stock_code'])
+              if (generation !== socket.data.generation)
+                break
+	      detail(socket, '0' + row['stock_code'], generation)
 	    }
 	    break
 	  default:
@@ -70,7 +108,9 @@ export default defineNitroPlugin(async (app) => {
               codes = (await app.broker.plateSecurity({code: name})).map(({code}) => { return code })
             for (const code of codes) {
               await Promise.delay(sleep)
-              detail(socket, code)
+              if (generation !== socket.data.generation)
+                break
+              detail(socket, code, generation)
             }
 	    break
 	}
@@ -82,6 +122,7 @@ export default defineNitroPlugin(async (app) => {
 	  detail(socket, sector.code)
 	}
       })
+    socket.on('disconnect', () => clear(socket))
   })
   app.router.use('/socket.io/', defineEventHandler({
     handler(event) {

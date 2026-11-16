@@ -35,8 +35,8 @@
 </template>
 
 <script setup>
-import {reactive, ref} from 'vue'
-import {socket, watchlist, quote, delta, basic} from './socket'
+import {reactive, ref, watch, onUnmounted} from 'vue'
+import {socket, quote, delta, basic} from './socket'
 import {h, resolveComponent} from 'vue'
 
 const props = defineProps(['code'])
@@ -69,13 +69,35 @@ const colHead = (el, col, opts) => {
   return h(UButton, opts)
 }
 
+const refresh = () => {
+  items.splice(0)
+  socket.emit('watchlist', {name: props.code})
+}
+watch(() => props.code, refresh)
+
+const handlers = {
+  connect: refresh,
+  clear: () => items.splice(0),
+  quote: quote(items),
+  basic: basic(items),
+  delta: delta(items)
+}
 socket
-  .on('connect', () => {
-    socket.emit('watchlist', {name: props.code})
-  })
-  .on('quote', quote(items))
-  .on('basic', basic(items))
-  .on('delta', delta(items))
+  .on('connect', handlers.connect)
+  .on('watchlist:clear', handlers.clear)
+  .on('quote', handlers.quote)
+  .on('basic', handlers.basic)
+  .on('delta', handlers.delta)
+onUnmounted(() => {
+  socket.off('connect', handlers.connect)
+  socket.off('watchlist:clear', handlers.clear)
+  socket.off('quote', handlers.quote)
+  socket.off('basic', handlers.basic)
+  socket.off('delta', handlers.delta)
+})
+
+if (socket.connected)
+  refresh()
 </script>
 
 <style>
