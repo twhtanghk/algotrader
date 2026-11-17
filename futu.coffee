@@ -55,9 +55,10 @@ class FutuOrder extends Order
     @fillAvgPrice = opts.fillAvgPrice
 
   @fromFutu: (i) ->
-    {code, name, trdSide, orderType, orderStatus, orderID, orderStatus, price, qty, fillQty, fillAvgPrice, updateTimestamp, createTimestamp} = i
+    return unless i?
+    {code, name, trdSide, orderType, orderStatus, orderID, price, qty, fillQty, fillAvgPrice, updateTimestamp, createTimestamp} = i
     new Order
-      id: orderID.toNumber()
+      id: orderID?.toNumber?()
       code: code
       name: name
       side: Futu.invert.TrdSide[trdSide]
@@ -109,7 +110,8 @@ class Account extends ReplaySubject
     from (openOrder.orderList
       .concat history.orderList
       .map (order) ->
-        (FutuOrder.fromFutu order).toJSON()
+        (FutuOrder.fromFutu order)?.toJSON()
+      .filter (order) -> order?
     )
 
   streamOrder: ->
@@ -119,9 +121,16 @@ class Account extends ReplaySubject
     await @broker.ws.SubAccPush req
     @broker
       .pipe filter ({type, data}) ->
-        type in ['Trd_UpdateOrder', 'Trd_UpdateOrderFill']
+        type is 'Trd_UpdateOrder' or (type is 'Trd_UpdateOrderFill' and data.orderFill?)
       .pipe map ({type, data}) ->
-        (FutuOrder.fromFutu data.order).toJSON()
+        if type is 'Trd_UpdateOrderFill'
+          {code, name, trdSide, orderID, qty, price, status, createTimestamp, updateTimestamp} = data.orderFill
+          {code, name, trdSide, orderID, orderStatus: status, qty, price, fillQty: qty, fillAvgPrice: price, createTimestamp, updateTimestamp}
+        else
+          data.order
+      .pipe filter (order) -> order?
+      .pipe map (order) ->
+        FutuOrder.fromFutu(order).toJSON()
 
   placeOrder: (order) ->
     super order
